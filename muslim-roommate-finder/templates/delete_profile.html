@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Profile - Muslim Roommate Finder</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Delete Profile</h1>
+                <a href="{% url 'profile_detail' profile.id %}" class="btn btn-outline-secondary">← Back to Profile</a>
+            </div>
+
+            <!-- Warning Alert -->
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">⚠️ Warning: This action cannot be undone!</h4>
+                <p>You are about to delete the profile for <strong>{{ profile.name }}</strong>. This action will permanently remove all profile information from the database.</p>
+                <hr>
+                <p class="mb-0">Please confirm that you want to proceed with this deletion.</p>
+            </div>
+
+            <!-- Profile Information Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Profile to be deleted:</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Name:</strong> {{ profile.name }}</p>
+                            <p><strong>Age:</strong> {{ profile.age }}</p>
+                            <p><strong>Gender:</strong> {{ profile.get_gender_display }}</p>
+                            <p><strong>City:</strong> {{ profile.city }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Email:</strong> {{ profile.contact_email }}</p>
+                            <p><strong>Looking for room:</strong> 
+                                {% if profile.is_looking_for_room %}
+                                    <span class="badge bg-success">Yes</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">No</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Preferences:</strong></p>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% if profile.halal_kitchen %}
+                                    <span class="badge bg-success">Halal Kitchen</span>
+                                {% endif %}
+                                {% if profile.prayer_friendly %}
+                                    <span class="badge bg-info">Prayer Friendly</span>
+                                {% endif %}
+                                {% if profile.guests_allowed %}
+                                    <span class="badge bg-warning">Guests Allowed</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if profile.bio %}
+                        <hr>
+                        <p><strong>Bio:</strong></p>
+                        <p class="text-muted">{{ profile.bio }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Confirmation Form -->
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Hidden confirmation field -->
+                        <input type="hidden" name="confirmed" value="true">
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg flex-grow-1">
+                                🗑️ Yes, Delete Profile
+                            </button>
+                            <a href="{% url 'profile_detail' profile.id %}" class="btn btn-outline-secondary btn-lg">
+                                ❌ Cancel
+                            </a>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <strong>Note:</strong> This action will permanently remove the profile and cannot be undone.
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

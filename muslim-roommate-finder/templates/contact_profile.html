@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contact {{ profile.name }} - Muslim Roommate Finder</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Contact {{ profile.name }}</h1>
+                <a href="{% url 'profile_detail' profile.id %}" class="btn btn-outline-secondary">← Back to Profile</a>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Profile Summary Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">You're contacting:</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Name:</strong> {{ profile.name }}</p>
+                            <p><strong>Age:</strong> {{ profile.age }}</p>
+                            <p><strong>City:</strong> {{ profile.city }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Looking for room:</strong> 
+                                {% if profile.is_looking_for_room %}
+                                    <span class="badge bg-success">Yes</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">No</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Preferences:</strong></p>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% if profile.halal_kitchen %}
+                                    <span class="badge bg-success">Halal Kitchen</span>
+                                {% endif %}
+                                {% if profile.prayer_friendly %}
+                                    <span class="badge bg-info">Prayer Friendly</span>
+                                {% endif %}
+                                {% if profile.guests_allowed %}
+                                    <span class="badge bg-warning">Guests Allowed</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if profile.bio %}
+                        <hr>
+                        <p><strong>About {{ profile.name }}:</strong></p>
+                        <p class="text-muted">{{ profile.bio }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Contact Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Send a Message</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.sender_name.id_for_label }}" class="form-label">{{ form.sender_name.label }}</label>
+                            {{ form.sender_name }}
+                            {% if form.sender_name.help_text %}
+                                <div class="form-text">{{ form.sender_name.help_text }}</div>
+                            {% endif %}
+                            {% if form.sender_name.errors %}
+                                <div class="text-danger">{{ form.sender_name.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.sender_email.id_for_label }}" class="form-label">{{ form.sender_email.label }}</label>
+                            {{ form.sender_email }}
+                            {% if form.sender_email.help_text %}
+                                <div class="form-text">{{ form.sender_email.help_text }}</div>
+                            {% endif %}
+                            {% if form.sender_email.errors %}
+                                <div class="text-danger">{{ form.sender_email.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.message.id_for_label }}" class="form-label">{{ form.message.label }}</label>
+                            {{ form.message }}
+                            {% if form.message.help_text %}
+                                <div class="form-text">{{ form.message.help_text }}</div>
+                            {% endif %}
+                            {% if form.message.errors %}
+                                <div class="text-danger">{{ form.message.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1">📧 Send Message</button>
+                            <a href="{% url 'profile_detail' profile.id %}" class="btn btn-outline-secondary btn-lg">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Privacy Notice -->
+            <div class="alert alert-info mt-4" role="alert">
+                <h6 class="alert-heading">ℹ️ Privacy Information</h6>
+                <p class="mb-0">
+                    Your contact information will be shared with {{ profile.name }} so they can reply to you. 
+                    Please be respectful and only contact profiles that match your preferences.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

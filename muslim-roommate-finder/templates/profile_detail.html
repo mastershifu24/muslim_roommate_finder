@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ profile.name }} - Muslim Roommate Finder</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container py-4">
+    <!-- Navigation -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary">← Back to Home</a>
+        </div>
+        <h1>Profile Details</h1>
+        <div>
+            <a href="{% url 'contact_profile' profile.id %}" class="btn btn-success me-2">📧 Contact {{ profile.name }}</a>
+            <a href="{% url 'edit_profile' profile.id %}" class="btn btn-warning me-2">✏️ Edit Profile</a>
+            <a href="{% url 'delete_profile' profile.id %}" class="btn btn-danger me-2">🗑️ Delete Profile</a>
+            <a href="{% url 'create_profile' %}" class="btn btn-primary">+ Create Profile</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Profile Information -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h2 class="card-title">{{ profile.name }}, {{ profile.age }}</h2>
+                            <h6 class="text-muted">{{ profile.city }} | {{ profile.get_gender_display }}</h6>
+                        </div>
+                        <div class="text-end">
+                            {% if profile.is_looking_for_room %}
+                                <span class="badge bg-primary fs-6">Looking for Room</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if profile.bio %}
+                        <div class="mb-4">
+                            <h5>About</h5>
+                            <p class="card-text">{{ profile.bio }}</p>
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-4">
+                        <h5>Contact Information</h5>
+                        <p><strong>Email:</strong> <a href="mailto:{{ profile.contact_email }}">{{ profile.contact_email }}</a></p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Lifestyle Preferences</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-2">
+                                    {% if profile.halal_kitchen %}
+                                        <span class="badge bg-success me-2">✓</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary me-2">✗</span>
+                                    {% endif %}
+                                    <span>Halal Kitchen</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    {% if profile.prayer_friendly %}
+                                        <span class="badge bg-success me-2">✓</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary me-2">✗</span>
+                                    {% endif %}
+                                    <span>Prayer-Friendly Environment</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-2">
+                                    {% if profile.guests_allowed %}
+                                        <span class="badge bg-success me-2">✓</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary me-2">✗</span>
+                                    {% endif %}
+                                    <span>Guests Allowed</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Similar Profiles Sidebar -->
+        <div class="col-md-4">
+            {% if similar_profiles %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Other Profiles in {{ profile.city }}</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for similar_profile in similar_profiles %}
+                            <div class="border-bottom pb-2 mb-2">
+                                <h6 class="mb-1">
+                                    <a href="{% url 'profile_detail' similar_profile.id %}" class="text-decoration-none">
+                                        {{ similar_profile.name }}, {{ similar_profile.age }}
+                                    </a>
+                                </h6>
+                                <small class="text-muted">{{ similar_profile.get_gender_display }}</small>
+                                {% if similar_profile.bio %}
+                                    <p class="small text-muted mb-1">{{ similar_profile.bio|truncatewords:10 }}</p>
+                                {% endif %}
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% if similar_profile.halal_kitchen %}
+                                        <span class="badge bg-success" style="font-size: 0.7em;">Halal</span>
+                                    {% endif %}
+                                    {% if similar_profile.prayer_friendly %}
+                                        <span class="badge bg-info" style="font-size: 0.7em;">Prayer</span>
+                                    {% endif %}
+                                    {% if similar_profile.is_looking_for_room %}
+                                        <span class="badge bg-primary" style="font-size: 0.7em;">Looking</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
