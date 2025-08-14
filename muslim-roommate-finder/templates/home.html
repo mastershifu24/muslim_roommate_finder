@@ -99,7 +99,7 @@
         <div class="row">
             {% for profile in profiles %}
                 <div class="col-md-4 mb-4">
-                    <a href="{% url 'profile_detail' profile.id %}" class="text-decoration-none">
+                    <a href="{{ profile.get_absolute_url }}" class="text-decoration-none">
                         <div class="card h-100 profile-card">
                             <div class="card-body">
                                 <h5 class="card-title text-dark">{{ profile.name }}, {{ profile.age }}</h5>

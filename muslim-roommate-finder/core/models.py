@@ -1,4 +1,6 @@
 from django.db import models
+from django.urls import reverse
+from django.utils.text import slugify
 
 class Profile(models.Model):
     GENDER_CHOICES = [('M', 'Male'), ('F', 'Female')]
@@ -10,11 +12,25 @@ class Profile(models.Model):
     is_looking_for_room = models.BooleanField(default=True)
     bio = models.TextField(blank=True)
     contact_email = models.EmailField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    slug = models.SlugField(max_length=140, unique=True, blank=True)
 
     # Lifestyle
     halal_kitchen = models.BooleanField(default=True)
     prayer_friendly = models.BooleanField(default=True)
     guests_allowed = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def get_absolute_url(self):
+        return reverse("profile_detail", args=[self.id])
+    
+    def save(self, *args, **kwargs):
+        if not self.slug and self.name and self.city:
+            self.slug = slugify(f"{self.name}-{self.city}")
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
