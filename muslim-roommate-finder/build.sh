@@ -1,14 +1,15 @@
-#exit on error
+#!/bin/bash
+# Exit on error
 set -o errexit
 
-#Install dependencies
+# Install dependencies
 pip install -r config/requirements.txt
 
-#Collect static files
+# Collect static files
 python manage.py collectstatic --noinput
 
-#Run database migrations
+# Run database migrations
 python manage.py migrate
 
-#Run server
-python manage.py runserver
+# Run the server with Gunicorn, using the port Render provides
+gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000}
