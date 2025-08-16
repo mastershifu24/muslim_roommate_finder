@@ -9,7 +9,7 @@ load_dotenv(BASE_DIR / '.env')
 
 # SECURITY
 SECRET_KEY = os.getenv('SECRET_KEY', 'change-this-to-a-secure-key')
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = False
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '.onrender.com').split(',')
 
 # APPLICATION DEFINITION
