@@ -1,36 +1,53 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.db.models import Q  # For complex database queries (OR conditions)
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-from .models import Profile, Contact
+from django.db.models import Q
+from .models import Profile
 from .forms import ProfileForm, ContactForm
 
 def home(request):
     # Get search parameters from URL (e.g., ?city=NewYork&gender=M)
     search_query = request.GET.get('search', '')  # Get 'search' parameter, default to empty string
     city_filter = request.GET.get('city', '')  # Get 'city' parameter
+    neighborhood_filter = request.GET.get('neighborhood', '')  # Get 'neighborhood' parameter
     gender_filter = request.GET.get('gender', '')  # Get 'gender' parameter
     preference_filter = request.GET.get('preference', '')  # Get 'preference' parameter
+    age_min = request.GET.get('age_min', '') # Get 'age_min' parameter
+    age_max = request.GET.get('age_max', '') # Get 'age_max' parameter
+    charleston_only = request.GET.get('charleston_only', '') # Get 'charleston_only' paramete
     
-    # Start with all profiles
+    # Start with all profiles, optimize with select_related if needed later
     profiles = Profile.objects.all()
     
-    # Apply search filter (searches name, city, and bio)
+    # Apply search filter (searches name, city, neighborhood, and bio)
     if search_query:
         profiles = profiles.filter(
             Q(name__icontains=search_query) |  # Search in name (case-insensitive)
             Q(city__icontains=search_query) |  # Search in city
+            Q(neighborhood__icontains=search_query) | # Search in neighborhood
             Q(bio__icontains=search_query)     # Search in bio
         )
     
-    # Apply city filter
+    # Apply city and location filter
     if city_filter:
         profiles = profiles.filter(city__icontains=city_filter)
+    if neighborhood_filter:
+        profiles = profiles.filter(neighborhood__icontains=neighborhood_filter)
+
+    #Charleston area filter
+    if charleston_only:
+        charleston_areas = ['Downtown', 'West Ashley', 'Mount Pleasant', 'James Island', 'Charleston County']
+        profiles = profiles.filter(city__iregex=r'(' + '|'.join(charleston_areas) + ')')
     
     # Apply gender filter
     if gender_filter:
         profiles = profiles.filter(gender=gender_filter)
+
+    if age_min:
+        profiles = profiles.filter(age__gte=age_min)
+    if age_max:
+        profiles = profiles.filter(age__lte=age_max)
+    else:
+        raise ValueError("Age range must be specified")
     
     # Apply preference filter
     if preference_filter:
@@ -43,17 +60,24 @@ def home(request):
         elif preference_filter == 'looking_for_room':
             profiles = profiles.filter(is_looking_for_room=True)
     
-    # Get unique cities for the city dropdown
+    # Get unique cities and neighborhoods for dropdowns
     cities = Profile.objects.values_list('city', flat=True).distinct().order_by('city')
+    neighborhoods = Profile.objects.values_list('neighborhood', flat=True).distinct().order_by('neighborhood')
     
     # Create context dictionary to send to template
     context = {
         'profiles': profiles,
         'cities': cities,
+        'neighborhoods': neighborhoods,
         'search_query': search_query,
         'city_filter': city_filter,
+        "neighborhood_filter": neighborhood_filter,
         'gender_filter': gender_filter,
         'preference_filter': preference_filter,
+        'age_min': age_min,
+        'age_max': age_max,
+        'charleston_only': charleston_only,
+        "profile_count": profiles.count(),
     }
     
     return render(request, 'home.html', context)
@@ -72,13 +96,33 @@ def profile_detail(request, profile_id):
     # get_object_or_404 tries to find the profile, if not found, shows 404 page
     profile = get_object_or_404(Profile, id=profile_id)
     
-    # Get similar profiles (same city, different person)
-    similar_profiles = Profile.objects.filter(
-        city=profile.city
-    ).exclude(
-        id=profile.id  # Exclude the current profile
-    )[:3]  # Limit to 3 similar profiles
-    
+    # Get similar profiles with better location matching
+    similar_profiles = Profile.objects.exclude(id=profile.id)
+    if profile.neighborhood:
+        similar_neighborhood = similar_profiles.filter(
+            city=profile.city,
+            neighborhood=profile.neighborhood
+        )[:2]
+        similar_profiles = list(similar_neighborhood)
+    else:
+        similar_profiles_list = []
+
+    #then same city
+    if len(similar_profiles_list) < 3:
+        similar_city = similar_profiles.filter(city=profile.city).exclude(
+            id__in=[p.id for p in similar_profiles_list]
+        )[:3-len(similar_profiles_list)]
+        similar_profiles_list.extend(similar_city)
+    #if still need more, and it's charleston area, expand to Charleston metro
+    if len(similar_profiles_list) < 3 and profile.is_charleston_area():
+        charleston_cities = ['charleston', 'mount pleasant', 'west ashley']
+        similar_metro = similar_profiles.filter(
+            city__iregex=r'(' + '|'.join(charleston_cities) + ')'
+        ).exclude(
+            id_in=[p.id for p in similar_profiles_list]
+        )[:3-len(similar_profiles_list)]
+        similar_profiles_list.extend(similar_metro)
+    similar_profiles = similar_profiles_list
     context = {
         'profile': profile,
         'similar_profiles': similar_profiles,

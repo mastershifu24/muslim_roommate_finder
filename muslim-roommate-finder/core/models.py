@@ -59,6 +59,7 @@ class Profile(models.Model):
         return self.get_gender_display()
     
     def get_halal_kitchen_display(self):
+        return "Halal Kitchen" if self.halal_kitchen else "Not Halal Kitchen"
     
     def save(self, *args, **kwargs):
         if not self.slug and self.name and self.city:
