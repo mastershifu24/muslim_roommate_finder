@@ -4,13 +4,14 @@ from .models import Profile, Contact
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['name', 'age', 'gender', 'city', 'is_looking_for_room', 'bio', 'contact_email', 
+        fields = ['name', 'age', 'gender', 'city', 'neighborhood', 'is_looking_for_room', 'bio', 'contact_email', 
                  'halal_kitchen', 'prayer_friendly', 'guests_allowed']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your full name'}),
             'age': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter your age'}),
             'gender': forms.Select(attrs={'class': 'form-select'}),
-            'city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your city'}),
+            'city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Charleston, Mount Pleasant, West Ashley, James Island'}),
+            'neighborhood': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Downtown, West Ashley, Mount Pleasant'}),
             'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Tell us about yourself, your lifestyle, and what you\'re looking for in a roommate...'}),
             'contact_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter your email address'}),
             'is_looking_for_room': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
