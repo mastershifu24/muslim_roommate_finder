@@ -9,6 +9,8 @@ class Profile(models.Model):
     age = models.IntegerField()
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     city = models.CharField(max_length=100)
+    #Starting with Charleston for now
+    neighborhood = models.CharField(max_length=100, blank=True, help_text="Downtown, West Ashley, Mount Pleasant")
     is_looking_for_room = models.BooleanField(default=True)
     bio = models.TextField(blank=True)
     contact_email = models.EmailField()
@@ -23,9 +25,40 @@ class Profile(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=['city', 'neighborhood']),
+            models.Index(fields=['age']),
+            models.Index(fields=['gender']),
+            models.Index(fields=['city', 'gender']),
+            models.Index(fields=['city', 'is_looking_for_room']),
+            models.Index(fields=['city', 'halal_kitchen']),
+            models.Index(fields=['city', 'prayer_friendly']),
+            models.Index(fields=['city', 'guests_allowed']),
+            models.Index(fields=['i_looking_for_room']),
+            models.Index(fields=['city', 'created_at']),
+        ]
 
     def get_absolute_url(self):
         return reverse("profile_detail", args=[self.id])
+    
+    def get_location_display(self):
+        if self.neighborhood and self.city:
+            return f"{self.neighborhood}, {self.city}"
+        elif self.city:
+            return self.city
+        return "Unknown"
+    
+    def get_age_range(self):
+        return (self.age - 2, self.age + 2)
+    
+    def is_charleston_area(self):
+        charleston_areas = ['Downtown', 'West Ashley', 'Mount Pleasant', 'James Island', 'Charleston County']
+        return self.city.lower() in charleston_areas
+    
+    def get_gender_display(self):
+        return self.get_gender_display()
+    
+    def get_halal_kitchen_display(self):
     
     def save(self, *args, **kwargs):
         if not self.slug and self.name and self.city:
