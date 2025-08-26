@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin #this import is used to access the admin site
 from django.urls import path #this import is used to define the url patterns for the app
-from core.views import home, create_profile, profile_detail, edit_profile, delete_profile, contact_profile
+from core.views import home, create_profile, profile_detail, edit_profile, delete_profile, contact_profile, room_detail, create_room
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,4 +26,6 @@ urlpatterns = [
     path('profile/<int:profile_id>/edit/', edit_profile, name='edit_profile'),
     path('profile/<int:profile_id>/delete/', delete_profile, name='delete_profile'),
     path('profile/<int:profile_id>/contact/', contact_profile, name='contact_profile'),
+    path('rooms/<int:room_id>/', room_detail, name='room_detail'),
+    path('rooms/create/', create_room, name='create_room'),
 ]

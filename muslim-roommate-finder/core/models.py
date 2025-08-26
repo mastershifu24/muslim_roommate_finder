@@ -34,7 +34,7 @@ class Profile(models.Model):
             models.Index(fields=['city', 'halal_kitchen']),
             models.Index(fields=['city', 'prayer_friendly']),
             models.Index(fields=['city', 'guests_allowed']),
-            models.Index(fields=['i_looking_for_room']),
+            models.Index(fields=['is_looking_for_room']),
             models.Index(fields=['city', 'created_at']),
         ]
 
@@ -55,9 +55,6 @@ class Profile(models.Model):
         charleston_areas = ['Downtown', 'West Ashley', 'Mount Pleasant', 'James Island', 'Charleston County']
         return self.city.lower() in charleston_areas
     
-    def get_gender_display(self):
-        return self.get_gender_display()
-    
     def get_halal_kitchen_display(self):
         return "Halal Kitchen" if self.halal_kitchen else "Not Halal Kitchen"
     
@@ -68,6 +65,59 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Room(models.Model):
+    """Room listing posted by a user (optionally linked to a Profile)."""
+
+    owner = models.ForeignKey(
+        Profile,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='rooms'
+    )
+
+    title = models.CharField(max_length=140)
+    description = models.TextField(blank=True)
+
+    city = models.CharField(max_length=100)
+    neighborhood = models.CharField(max_length=100, blank=True, help_text="Downtown, West Ashley, Mount Pleasant")
+
+    rent = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    available_from = models.DateField(null=True, blank=True)
+
+    # Lifestyle preferences for the household/room
+    halal_kitchen = models.BooleanField(default=True)
+    prayer_friendly = models.BooleanField(default=True)
+    guests_allowed = models.BooleanField(default=False)
+
+    contact_email = models.EmailField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    slug = models.SlugField(max_length=160, unique=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=['city', 'neighborhood']),
+            models.Index(fields=['city', 'created_at']),
+        ]
+
+    def save(self, *args, **kwargs):
+        # Default contact_email to owner's if not provided
+        if not self.contact_email and self.owner:
+            self.contact_email = self.owner.contact_email
+        if not self.slug and self.title and self.city:
+            self.slug = slugify(f"{self.title}-{self.city}")
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("room_detail", args=[self.id])
+
+    def __str__(self):
+        return self.title
 
 class Contact(models.Model):
     """

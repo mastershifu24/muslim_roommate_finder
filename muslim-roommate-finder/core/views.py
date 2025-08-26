@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Q
-from .models import Profile
-from .forms import ProfileForm, ContactForm
+from .models import Profile, Room
+from .forms import ProfileForm, ContactForm, RoomForm
 
 def home(request):
     # Get search parameters from URL (e.g., ?city=NewYork&gender=M)
@@ -64,18 +64,17 @@ def home(request):
     cities = Profile.objects.values_list('city', flat=True).distinct().order_by('city')
     neighborhoods = Profile.objects.values_list('neighborhood', flat=True).distinct().order_by('neighborhood')
     
-    # Get available rooms (profiles not looking for rooms)
-    available_rooms = Profile.objects.filter(is_looking_for_room=False)
-    
-    # Apply same filters to available rooms
+    # Get available rooms from Room model
+    available_rooms = Room.objects.all()
+
+    # Apply filters to available rooms
     if search_query:
         available_rooms = available_rooms.filter(
-            Q(name__icontains=search_query) |
+            Q(title__icontains=search_query) |
+            Q(description__icontains=search_query) |
             Q(city__icontains=search_query) |
-            Q(neighborhood__icontains=search_query) |
-            Q(bio__icontains=search_query)
+            Q(neighborhood__icontains=search_query)
         )
-    
     if city_filter:
         available_rooms = available_rooms.filter(city__icontains=city_filter)
     if neighborhood_filter:
@@ -83,19 +82,8 @@ def home(request):
     if charleston_only:
         charleston_areas = ['Downtown', 'West Ashley', 'Mount Pleasant', 'James Island', 'Charleston County']
         available_rooms = available_rooms.filter(city__iregex=r'(' + '|'.join(charleston_areas) + ')')
-    if gender_filter:
-        available_rooms = available_rooms.filter(gender=gender_filter)
-    if age_min:
-        available_rooms = available_rooms.filter(age__gte=age_min)
-    if age_max:
-        available_rooms = available_rooms.filter(age__lte=age_max)
-    if preference_filter:
-        if preference_filter == 'halal_kitchen':
-            available_rooms = available_rooms.filter(halal_kitchen=True)
-        elif preference_filter == 'prayer_friendly':
-            available_rooms = available_rooms.filter(prayer_friendly=True)
-        elif preference_filter == 'guests_allowed':
-            available_rooms = available_rooms.filter(guests_allowed=True)
+    if preference_filter in ['halal_kitchen', 'prayer_friendly', 'guests_allowed']:
+        available_rooms = available_rooms.filter(**{preference_filter: True})
     
     # Create context dictionary to send to template
     context = {
@@ -166,6 +154,13 @@ def profile_detail(request, profile_id):
     }
     
     return render(request, 'profile_detail.html', context)
+
+def room_detail(request, room_id):
+    room = get_object_or_404(Room, id=room_id)
+    context = {
+        'room': room,
+    }
+    return render(request, 'room_detail.html', context)
 
 def contact_profile(request, profile_id):
     """
@@ -302,3 +297,16 @@ def create_profile(request):
         form = ProfileForm()
     
     return render(request, 'create_profile.html', {'form': form})
+
+def create_room(request):
+    if request.method == 'POST':
+        form = RoomForm(request.POST)
+        if form.is_valid():
+            room = form.save()
+            messages.success(request, 'Room listing created successfully!')
+            return redirect('room_detail', room_id=room.id)
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = RoomForm()
+    return render(request, 'create_room.html', {'form': form})

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Contact
+from .models import Profile, Contact, Room
 
 @admin.register(Profile)  # This decorator registers the Profile model with admin
 class ProfileAdmin(admin.ModelAdmin):
@@ -178,3 +178,36 @@ class ContactAdmin(admin.ModelAdmin):
         updated = queryset.update(is_read=False)
         self.message_user(request, f'{updated} contacts marked as unread.')
     mark_as_unread.short_description = "Mark selected contacts as unread"
+
+
+@admin.register(Room)
+class RoomAdmin(admin.ModelAdmin):
+    list_display = [
+        'title',
+        'city',
+        'neighborhood',
+        'rent',
+        'available_from',
+        'halal_kitchen',
+        'prayer_friendly',
+        'guests_allowed',
+        'owner',
+        'created_at',
+    ]
+    list_filter = [
+        'city',
+        'neighborhood',
+        'halal_kitchen',
+        'prayer_friendly',
+        'guests_allowed',
+        'available_from',
+    ]
+    search_fields = [
+        'title',
+        'description',
+        'city',
+        'neighborhood',
+        'owner__name',
+    ]
+    readonly_fields = ['created_at', 'updated_at']
+    ordering = ('-created_at',)

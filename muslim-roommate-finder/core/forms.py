@@ -1,5 +1,5 @@
 from django import forms
-from .models import Profile, Contact
+from .models import Profile, Contact, Room
 
 class ProfileForm(forms.ModelForm):
     class Meta:
@@ -108,3 +108,28 @@ class ContactForm(forms.ModelForm):
             )
         
         return name.strip() 
+
+
+class RoomForm(forms.ModelForm):
+    class Meta:
+        model = Room
+        fields = [
+            'owner', 'title', 'description',
+            'city', 'neighborhood',
+            'rent', 'available_from',
+            'halal_kitchen', 'prayer_friendly', 'guests_allowed',
+            'contact_email',
+        ]
+        widgets = {
+            'owner': forms.Select(attrs={'class': 'form-select'}),
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Room in Downtown Charleston'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'city': forms.TextInput(attrs={'class': 'form-control'}),
+            'neighborhood': forms.TextInput(attrs={'class': 'form-control'}),
+            'rent': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'available_from': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'contact_email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'halal_kitchen': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'prayer_friendly': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'guests_allowed': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
