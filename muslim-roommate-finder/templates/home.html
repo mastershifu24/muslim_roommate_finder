@@ -29,6 +29,21 @@
         {% endfor %}
     {% endif %}
 
+    <!-- Quick Filter Buttons -->
+    <div class="mb-3">
+        <div class="btn-group" role="group">
+            <a href="{% url 'home' %}" class="btn btn-outline-primary {% if not preference_filter %}active{% endif %}">
+                Show All
+            </a>
+            <a href="?preference=offering_room" class="btn btn-outline-success {% if preference_filter == 'offering_room' %}active{% endif %}">
+                🏠 Available Rooms
+            </a>
+            <a href="?preference=looking_for_room" class="btn btn-outline-info {% if preference_filter == 'looking_for_room' %}active{% endif %}">
+                👥 Looking for Rooms
+            </a>
+        </div>
+    </div>
+
     <!-- Search and Filter Form -->
     <div class="card mb-4">
         <div class="card-body">
@@ -72,6 +87,7 @@
                         <option value="prayer_friendly" {% if preference_filter == 'prayer_friendly' %}selected{% endif %}>Prayer Friendly</option>
                         <option value="guests_allowed" {% if preference_filter == 'guests_allowed' %}selected{% endif %}>Guests Allowed</option>
                         <option value="looking_for_room" {% if preference_filter == 'looking_for_room' %}selected{% endif %}>Looking for Room</option>
+                        <option value="offering_room" {% if preference_filter == 'offering_room' %}selected{% endif %}>Offering Room</option>
                     </select>
                 </div>
                 
@@ -90,54 +106,106 @@
         </div>
     </div>
 
-    <!-- Results Count -->
-    <div class="mb-3">
-        <h5>Found {{ profiles|length }} profile{{ profiles|length|pluralize }}</h5>
-    </div>
-
-    {% if profiles %}
-        <div class="row">
-            {% for profile in profiles %}
-                <div class="col-md-4 mb-4">
-                    <a href="{{ profile.get_absolute_url }}" class="text-decoration-none">
-                        <div class="card h-100 profile-card">
-                            <div class="card-body">
-                                <h5 class="card-title text-dark">{{ profile.name }}, {{ profile.age }}</h5>
-                                <h6 class="card-subtitle mb-2 text-muted">{{ profile.city }} | {{ profile.get_gender_display }}</h6>
-                                
-                                {% if profile.bio %}
-                                    <p class="card-text text-dark">{{ profile.bio }}</p>
-                                {% endif %}
-                                
-                                <div class="mb-3">
-                                    <small class="text-muted">
-                                        <strong>Contact:</strong> {{ profile.contact_email }}
-                                    </small>
+    <!-- Available Rooms Section -->
+    {% if available_rooms %}
+        <div class="mb-4">
+            <h3 class="text-success mb-3">
+                🏠 Available Rooms ({{ rooms_count }})
+            </h3>
+            <div class="row">
+                {% for room in available_rooms %}
+                    <div class="col-md-4 mb-4">
+                        <a href="{{ room.get_absolute_url }}" class="text-decoration-none">
+                            <div class="card h-100 profile-card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="card-title mb-0">{{ room.name }}, {{ room.age }}</h5>
                                 </div>
-                                
-                                <div class="d-flex flex-wrap gap-1">
-                                    {% if profile.halal_kitchen %}
-                                        <span class="badge bg-success">Halal Kitchen</span>
+                                <div class="card-body">
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ room.city }} | {{ room.get_gender_display }}</h6>
+                                    
+                                    {% if room.bio %}
+                                        <p class="card-text text-dark">{{ room.bio }}</p>
                                     {% endif %}
-                                    {% if profile.prayer_friendly %}
-                                        <span class="badge bg-info">Prayer Friendly</span>
-                                    {% endif %}
-                                    {% if profile.guests_allowed %}
-                                        <span class="badge bg-warning">Guests Allowed</span>
-                                    {% endif %}
-                                    {% if profile.is_looking_for_room %}
-                                        <span class="badge bg-primary">Looking for Room</span>
-                                    {% endif %}
+                                    
+                                    <div class="mb-3">
+                                        <small class="text-muted">
+                                            <strong>Contact:</strong> {{ room.contact_email }}
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% if room.halal_kitchen %}
+                                            <span class="badge bg-success">Halal Kitchen</span>
+                                        {% endif %}
+                                        {% if room.prayer_friendly %}
+                                            <span class="badge bg-info">Prayer Friendly</span>
+                                        {% endif %}
+                                        {% if room.guests_allowed %}
+                                            <span class="badge bg-warning">Guests Allowed</span>
+                                        {% endif %}
+                                        <span class="badge bg-success">Room Available</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </a>
-                </div>
-            {% endfor %}
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
-    {% else %}
+    {% endif %}
+
+    <!-- People Looking for Rooms Section -->
+    {% if profiles %}
+        <div class="mb-4">
+            <h3 class="text-primary mb-3">
+                👥 People Looking for Rooms ({{ profile_count }})
+            </h3>
+            <div class="row">
+                {% for profile in profiles %}
+                    <div class="col-md-4 mb-4">
+                        <a href="{{ profile.get_absolute_url }}" class="text-decoration-none">
+                            <div class="card h-100 profile-card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="card-title mb-0">{{ profile.name }}, {{ profile.age }}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <h6 class="card-subtitle mb-2 text-muted">{{ profile.city }} | {{ profile.get_gender_display }}</h6>
+                                    
+                                    {% if profile.bio %}
+                                        <p class="card-text text-dark">{{ profile.bio }}</p>
+                                    {% endif %}
+                                    
+                                    <div class="mb-3">
+                                        <small class="text-muted">
+                                            <strong>Contact:</strong> {{ profile.contact_email }}
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% if profile.halal_kitchen %}
+                                            <span class="badge bg-success">Halal Kitchen</span>
+                                        {% endif %}
+                                        {% if profile.prayer_friendly %}
+                                            <span class="badge bg-info">Prayer Friendly</span>
+                                        {% endif %}
+                                        {% if profile.guests_allowed %}
+                                            <span class="badge bg-warning">Guests Allowed</span>
+                                        {% endif %}
+                                        <span class="badge bg-primary">Looking for Room</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- No Results Message -->
+    {% if not profiles and not available_rooms %}
         <div class="text-center py-5">
-            <h3 class="text-muted">No profiles found</h3>
+            <h3 class="text-muted">No profiles or rooms found</h3>
             <p class="text-muted">
                 {% if search_query or city_filter or gender_filter or preference_filter %}
                     Try adjusting your search criteria.

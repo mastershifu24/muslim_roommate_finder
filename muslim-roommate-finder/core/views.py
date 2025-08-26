@@ -46,8 +46,6 @@ def home(request):
         profiles = profiles.filter(age__gte=age_min)
     if age_max:
         profiles = profiles.filter(age__lte=age_max)
-    else:
-        raise ValueError("Age range must be specified")
     
     # Apply preference filter
     if preference_filter:
@@ -59,14 +57,50 @@ def home(request):
             profiles = profiles.filter(guests_allowed=True)
         elif preference_filter == 'looking_for_room':
             profiles = profiles.filter(is_looking_for_room=True)
+        elif preference_filter == 'offering_room':
+            profiles = profiles.filter(is_looking_for_room=False)
     
     # Get unique cities and neighborhoods for dropdowns
     cities = Profile.objects.values_list('city', flat=True).distinct().order_by('city')
     neighborhoods = Profile.objects.values_list('neighborhood', flat=True).distinct().order_by('neighborhood')
     
+    # Get available rooms (profiles not looking for rooms)
+    available_rooms = Profile.objects.filter(is_looking_for_room=False)
+    
+    # Apply same filters to available rooms
+    if search_query:
+        available_rooms = available_rooms.filter(
+            Q(name__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(neighborhood__icontains=search_query) |
+            Q(bio__icontains=search_query)
+        )
+    
+    if city_filter:
+        available_rooms = available_rooms.filter(city__icontains=city_filter)
+    if neighborhood_filter:
+        available_rooms = available_rooms.filter(neighborhood__icontains=neighborhood_filter)
+    if charleston_only:
+        charleston_areas = ['Downtown', 'West Ashley', 'Mount Pleasant', 'James Island', 'Charleston County']
+        available_rooms = available_rooms.filter(city__iregex=r'(' + '|'.join(charleston_areas) + ')')
+    if gender_filter:
+        available_rooms = available_rooms.filter(gender=gender_filter)
+    if age_min:
+        available_rooms = available_rooms.filter(age__gte=age_min)
+    if age_max:
+        available_rooms = available_rooms.filter(age__lte=age_max)
+    if preference_filter:
+        if preference_filter == 'halal_kitchen':
+            available_rooms = available_rooms.filter(halal_kitchen=True)
+        elif preference_filter == 'prayer_friendly':
+            available_rooms = available_rooms.filter(prayer_friendly=True)
+        elif preference_filter == 'guests_allowed':
+            available_rooms = available_rooms.filter(guests_allowed=True)
+    
     # Create context dictionary to send to template
     context = {
         'profiles': profiles,
+        'available_rooms': available_rooms,
         'cities': cities,
         'neighborhoods': neighborhoods,
         'search_query': search_query,
@@ -78,6 +112,7 @@ def home(request):
         'age_max': age_max,
         'charleston_only': charleston_only,
         "profile_count": profiles.count(),
+        "rooms_count": available_rooms.count(),
     }
     
     return render(request, 'home.html', context)
@@ -98,30 +133,32 @@ def profile_detail(request, profile_id):
     
     # Get similar profiles with better location matching
     similar_profiles = Profile.objects.exclude(id=profile.id)
+    similar_profiles_list = []
+    
     if profile.neighborhood:
         similar_neighborhood = similar_profiles.filter(
             city=profile.city,
             neighborhood=profile.neighborhood
         )[:2]
-        similar_profiles = list(similar_neighborhood)
-    else:
-        similar_profiles_list = []
+        similar_profiles_list.extend(similar_neighborhood)
 
-    #then same city
+    # Then same city
     if len(similar_profiles_list) < 3:
         similar_city = similar_profiles.filter(city=profile.city).exclude(
             id__in=[p.id for p in similar_profiles_list]
         )[:3-len(similar_profiles_list)]
         similar_profiles_list.extend(similar_city)
-    #if still need more, and it's charleston area, expand to Charleston metro
+    
+    # If still need more, and it's charleston area, expand to Charleston metro
     if len(similar_profiles_list) < 3 and profile.is_charleston_area():
         charleston_cities = ['charleston', 'mount pleasant', 'west ashley']
         similar_metro = similar_profiles.filter(
             city__iregex=r'(' + '|'.join(charleston_cities) + ')'
         ).exclude(
-            id_in=[p.id for p in similar_profiles_list]
+            id__in=[p.id for p in similar_profiles_list]
         )[:3-len(similar_profiles_list)]
         similar_profiles_list.extend(similar_metro)
+    
     similar_profiles = similar_profiles_list
     context = {
         'profile': profile,
