@@ -1,8 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Q
-from .models import Profile, Room
-from .forms import ProfileForm, ContactForm, RoomForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
+from .models import Profile, Room, Message
+from .forms import ProfileForm, ContactForm, RoomForm, UserRegistrationForm
 
 def home(request):
     # Get search parameters from URL (e.g., ?city=NewYork&gender=M)
@@ -284,11 +288,14 @@ def edit_profile(request, profile_id):
     
     return render(request, 'edit_profile.html', context)
 
+@login_required
 def create_profile(request):
     if request.method == 'POST':
         form = ProfileForm(request.POST)
         if form.is_valid():
-            form.save()
+            profile = form.save(commit=False)
+            profile.user = request.user
+            profile.save()
             messages.success(request, 'Profile created successfully!')
             return redirect('home')
         else:
@@ -298,11 +305,14 @@ def create_profile(request):
     
     return render(request, 'create_profile.html', {'form': form})
 
+@login_required
 def create_room(request):
     if request.method == 'POST':
         form = RoomForm(request.POST)
         if form.is_valid():
-            room = form.save()
+            room = form.save(commit=False)
+            room.user = request.user
+            room.save()
             messages.success(request, 'Room listing created successfully!')
             return redirect('room_detail', room_id=room.id)
         else:
@@ -310,3 +320,131 @@ def create_room(request):
     else:
         form = RoomForm()
     return render(request, 'create_room.html', {'form': form})
+
+def register(request):
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Account created successfully! Welcome to Muslim Roommate Finder!')
+            return redirect('home')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = UserRegistrationForm()
+    
+    return render(request, 'register.html', {'form': form})
+
+def user_login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Welcome back, {username}!')
+                return redirect('home')
+        else:
+            messages.error(request, 'Invalid username or password.')
+    else:
+        form = AuthenticationForm()
+    
+    return render(request, 'login.html', {'form': form})
+
+def user_logout(request):
+    logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('home')
+
+@login_required
+def dashboard(request):
+    user_rooms = Room.objects.filter(user=request.user)[:5]
+    user_profiles = Profile.objects.filter(user=request.user)[:5]
+    
+    return render(request, 'dashboard.html', {
+        'rooms': user_rooms,
+        'profiles': user_profiles
+    })
+
+@login_required
+def my_listings(request):
+    user_rooms = Room.objects.filter(user=request.user)
+    user_profiles = Profile.objects.filter(user=request.user)
+    
+    return render(request, 'my_listings.html', {
+        'rooms': user_rooms,
+        'profiles': user_profiles
+    })
+
+def advanced_search(request):
+    # Get all filter parameters
+    min_rent = request.GET.get('min_rent', '')
+    max_rent = request.GET.get('max_rent', '')
+    available_date = request.GET.get('available', '')
+    room_type = request.GET.get('room_type', '')
+
+    rooms = Room.objects.all()
+
+    if min_rent:
+        rooms = rooms.filter(rent__gte=min_rent)
+    if max_rent:
+        rooms = rooms.filter(rent__lte=max_rent)
+    if available_date:
+        rooms = rooms.filter(available_from__lte=available_date)
+    if room_type:
+        rooms = rooms.filter(room_type=room_type)
+
+    # Get unique values for dropdowns
+    cities = Room.objects.values_list('city', flat=True).distinct().order_by('city')
+    rent_ranges = [
+        ('0-500', 'Under $500'),
+        ('500-1000', '$500 - $1000'),
+        ('1000-1500', '$1,000 - $1,500'),
+        ('1500+', 'Over $1,500'),
+    ]
+
+    return render(request, 'advanced_search.html', {
+        'rooms': rooms,
+        'cities': cities,
+        'rent_ranges': rent_ranges,
+        'filters': request.GET
+    })
+
+@login_required
+def send_message(request, room_id=None):
+    if request.method == 'POST':
+        recipient_id = request.POST.get('recipient')
+        subject = request.POST.get('subject')
+        content = request.POST.get('content')
+
+        recipient = User.objects.get(id=recipient_id)
+        room = Room.objects.get(id=room_id) if room_id else None
+
+        Message.objects.create(
+            sender=request.user,
+            recipient=recipient,
+            room=room,
+            subject=subject,
+            content=content
+        )
+
+        messages.success(request, 'Message sent successfully!')
+        return redirect('inbox')
+    
+    room = Room.objects.get(id=room_id) if room_id else None
+    return render(request, 'send_message.html', {'room': room})
+
+@login_required
+def inbox(request):
+    received_messages = Message.objects.filter(recipient=request.user)
+    sent_messages = Message.objects.filter(sender=request.user)
+
+    return render(request, 'inbox.html', {
+        'received_messages': received_messages,
+        'sent_messages': sent_messages
+    })
+
+

@@ -1,5 +1,24 @@
 from django import forms
-from .models import Profile, Contact, Room
+from .models import Profile, Contact, Room, RoomImage
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+
+class UserRegistrationForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password1', 'password2')
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Choose a username'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter your email'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password1'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Enter password'})
+        self.fields['password2'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Confirm password'})
+
 
 class ProfileForm(forms.ModelForm):
     class Meta:
@@ -132,4 +151,14 @@ class RoomForm(forms.ModelForm):
             'halal_kitchen': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'prayer_friendly': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'guests_allowed': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+class RoomImageForm(forms.ModelForm):
+    class Meta:
+        model = RoomImage
+        fields = ['image', 'caption', 'is_primary']
+        widgets = {
+            'image': forms.FileInput(attrs={'class': 'form-control'}),
+            'caption': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_primary': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }

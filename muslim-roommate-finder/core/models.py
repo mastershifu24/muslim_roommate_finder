@@ -1,10 +1,12 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
+from django.contrib.auth.models import User
 
 class Profile(models.Model):
     GENDER_CHOICES = [('M', 'Male'), ('F', 'Female')]
 
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=100)
     age = models.IntegerField()
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
@@ -67,6 +69,14 @@ class Profile(models.Model):
         return self.name
 
 
+class RoomType(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Room(models.Model):
     """Room listing posted by a user (optionally linked to a Profile)."""
 
@@ -78,6 +88,7 @@ class Room(models.Model):
         related_name='rooms'
     )
 
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=140)
     description = models.TextField(blank=True)
 
@@ -97,6 +108,12 @@ class Room(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     slug = models.SlugField(max_length=160, unique=True, blank=True)
+
+    # Additional room features
+    room_type = models.ForeignKey(RoomType, on_delete=models.SET_NULL, null=True, blank=True)
+    private_bathroom = models.BooleanField(default=False)
+    furnished = models.BooleanField(default=False)
+    utilities_included = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-created_at"]
@@ -118,6 +135,7 @@ class Room(models.Model):
 
     def __str__(self):
         return self.title
+
 
 class Contact(models.Model):
     """
@@ -177,3 +195,122 @@ class Contact(models.Model):
         if len(self.message) <= 50:
             return self.message
         return self.message[:50] + "..."
+
+
+def room_image_path(instance, filename):
+    return f'room_images/{instance.room_id}/{filename}'
+
+
+class RoomImage(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to=room_image_path)
+    caption = models.CharField(max_length=200, blank=True)
+    is_primary = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-is_primary', 'id']
+
+    def __str__(self):
+        return f"Image for {self.room.title}"
+    
+
+class Message(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True, blank=True)
+    subject = models.CharField(max_length=200)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Message from {self.sender} to {self.recipient}"
+    
+
+class RoomReview(models.Model):
+    RATING_CHOICES = [
+        (1, '1 - Poor'),
+        (2, '2 - Fair'),
+        (3, '3 - Good'),
+        (4, '4 - Very Good'),
+        (5, '5 - Excellent'),
+    ]
+
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='reviews')
+    reviewer = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(choices=RATING_CHOICES)
+    review_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['room', 'reviewer']
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Review by {self.reviewer} for {self.room.title}"
+    
+
+class RoomAvailability(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='availability')
+    start_date = models.DateField()
+    end_date = models.DateField()
+    is_available = models.BooleanField(default=True)
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['start_date']
+
+    def __str__(self):
+        return f"{self.room.title} - {self.start_date} to {self.end_date}"
+    
+
+class Amenity(models.Model):
+    name = models.CharField(max_length=100)
+    icon = models.CharField(max_length=50, blank=True)
+
+    def __str__(self):
+        return self.name
+    
+
+class RoomAmenity(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='amenities')
+    amenity = models.ForeignKey(Amenity, on_delete=models.CASCADE)
+    included = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ['room', 'amenity']
+
+    def __str__(self):
+        return f"{self.room.title} - {self.amenity.name}"
+
+
+class RoomVerification(models.Model):
+    VERIFICATION_STATUS = [
+        ('pending', 'Pending'),
+        ('verified', 'Verified'),
+        ('rejected', 'Rejected'),
+    ]
+
+    room = models.OneToOneField(Room, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=VERIFICATION_STATUS, default='pending')
+    verified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
+    verification_notes = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"Verification for {self.room.title} - {self.status}"
+
+
+class RoomFavorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['user', 'room']
+
+    def __str__(self):
+        return f"{self.user.username} likes {self.room.title}"
