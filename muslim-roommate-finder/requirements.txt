@@ -4,3 +4,4 @@ whitenoise
 dj-database-url
 psycopg[binary]
 python-dotenv
+Pillow>=10.0.0
