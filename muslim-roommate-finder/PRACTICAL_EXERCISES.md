@@ -11,9 +11,12 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class RoomFavorite(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites') #User is a model we import directly from django.contrib.auth.models. Since Django knows what User is at this point, we can reference as a Python class.
     room = models.ForeignKey("Room", on_delete=models.CASCADE, related_name='favorited_by')
     created_at = models.DateTimeField(auto_now_add=True)
+    #Room is a string reference. Django lets us reference models by their name instead of actual class. This is useful when we either define the model later in same file, or model is in another app.
+    #Quotation marks also known as lazy reference, which means Django references it later. Also avoids import timing issues.
+    #Direct class reference with no quotation marks means we already have the model imported and can use it.
 
     class Meta:
         unique_together = ['user', 'room']  # Prevent duplicate favorites
