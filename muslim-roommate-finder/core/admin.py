@@ -198,7 +198,6 @@ class RoomAdmin(admin.ModelAdmin):
         'prayer_friendly',
         'guests_allowed',
         'owner',
-        'user',
         'created_at',
     ]
     list_filter = [
@@ -216,7 +215,6 @@ class RoomAdmin(admin.ModelAdmin):
         'city',
         'neighborhood',
         'owner__name',
-        'user__username',
     ]
     readonly_fields = ['created_at', 'updated_at']
     ordering = ('-created_at',)
