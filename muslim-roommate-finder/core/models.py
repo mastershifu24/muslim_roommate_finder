@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 class Profile(models.Model):
     GENDER_CHOICES = [('M', 'Male'), ('F', 'Female')]
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='profile')
     name = models.CharField(max_length=100)
     age = models.IntegerField()
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
@@ -55,7 +55,7 @@ class Profile(models.Model):
     
     def is_charleston_area(self):
         charleston_areas = ['Downtown', 'West Ashley', 'Mount Pleasant', 'James Island', 'Charleston County']
-        return self.city.lower() in charleston_areas
+        return self.city in charleston_areas
     
     def get_halal_kitchen_display(self):
         return "Halal Kitchen" if self.halal_kitchen else "Not Halal Kitchen"
@@ -68,6 +68,19 @@ class Profile(models.Model):
     def __str__(self):
         return self.name
 
+class RoommateProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="roommate_profile")
+    prays_five_times = models.BooleanField(default=True)
+    goes_to_masjid = models.BooleanField(default=True)
+    halal_only = models.BooleanField(default=True)
+    cleanliness_level = models.CharField(
+        max_length=20,
+        choices=[("very_clean", "Very Clean"), ("average", "Average"), ("messy", "Messy")],
+        default="average"
+    )
+
+    def __str__(self):
+        return f"{self.user.username}'s profile"
 
 class RoomType(models.Model):
     name = models.CharField(max_length=50)
@@ -79,7 +92,7 @@ class RoomType(models.Model):
 
 class Room(models.Model):
     """Room listing posted by a user (optionally linked to a Profile)."""
-
+    #We don't need user because owner is already linked to Profile.
     owner = models.ForeignKey(
         Profile,
         null=True,
@@ -87,8 +100,6 @@ class Room(models.Model):
         on_delete=models.SET_NULL,
         related_name='rooms'
     )
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=140)
     description = models.TextField(blank=True)
 
