@@ -9,8 +9,9 @@ load_dotenv(BASE_DIR / '.env')
 
 # SECURITY
 SECRET_KEY = os.getenv('SECRET_KEY', 'change-this-to-a-secure-key')
-DEBUG = False
-ALLOWED_HOSTS = ["muslim-roommate-finder.onrender.com"]
+DEBUG = True
+ALLOWED_HOSTS = ['*']  # allow all hosts for testing on Render
+# ALLOWED_HOSTS = ["muslim-roommate-finder.onrender.com"]
 
 
 # APPLICATION DEFINITION
