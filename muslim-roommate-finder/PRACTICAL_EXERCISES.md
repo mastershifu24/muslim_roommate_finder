@@ -7,19 +7,27 @@
 ### **Step 1: Create the Model**
 ```python
 # In models.py
+from django.db import models
+from django.contrib.auth.models import User
+
 class RoomFavorite(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
+    room = models.ForeignKey("Room", on_delete=models.CASCADE, related_name='favorited_by')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ['user', 'room']  # Prevent duplicate favorites
 
     def __str__(self):
-        return f"{self.user.username} likes {self.room.title}"
+        return f"{self.user.username} favorited {self.room.title}"
 
 ### **Step 2: Add the View**
 # In views.py
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+from .models import Room, RoomFavorite
+
 @login_required
 def toggle_favorite(request, room_id):
     room = get_object_or_404(Room, id=room_id)
@@ -31,7 +39,7 @@ def toggle_favorite(request, room_id):
     if not created:
         # User already favorited, so remove it
         favorite.delete()
-        messages.success(request, f'Removed {room.title} from favorites')
+        messages.success(request, f'Removed {room.title} from your favorites')
     else:
         messages.success(request, f'Added {room.title} to favorites')
     
@@ -39,15 +47,19 @@ def toggle_favorite(request, room_id):
 
 @login_required
 def my_favorites(request):
-    favorites = RoomFavorite.objects.filter(user=request.user)
+    favorites = RoomFavorite.objects.filter(user=request.user).select_related("room")
     return render(request, 'my_favorites.html', {'favorites': favorites})
 ```
 
 ### **Step 3: Add URLs**
 ```python
 # In urls.py
+from django.urls import path
+from .views import toggle_favorite, my_favorites
+urlpatterns = [
 path('room/<int:room_id>/favorite/', toggle_favorite, name='toggle_favorite'),
 path('my-favorites/', my_favorites, name='my_favorites'),
+]
 ```
 
 ### **Step 4: Update Templates**
@@ -55,7 +67,7 @@ path('my-favorites/', my_favorites, name='my_favorites'),
 <!-- In room_detail.html -->
 {% if user.is_authenticated %}
     <a href="{% url 'toggle_favorite' room.id %}" class="btn btn-outline-warning">
-        {% if room in user.roomfavorite_set.all %}
+        {% if room.favorited_by.filter(user=request.user).exists %}
             ❤️ Remove from Favorites
         {% else %}
             🤍 Add to Favorites
@@ -63,6 +75,18 @@ path('my-favorites/', my_favorites, name='my_favorites'),
     </a>
 {% endif %}
 ```
+<!-- In my_favorites.html -->
+<h2>My Favorite Rooms</h2>
+
+<ul>
+    {% for fav in favorites %}
+       <li>
+         <a href="{% url 'room_detail' fav.room.id %}">{{ fav.room.title }}</a>
+       </li>
+    {% empty %}
+      <p>You haven't favorited any rooms yet.</p>
+    {% endfor %}
+</ul>
 
 ## 🎯 Exercise 2: Add Room Reviews
 
