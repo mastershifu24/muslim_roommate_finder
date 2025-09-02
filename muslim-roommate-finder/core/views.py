@@ -294,7 +294,7 @@ def create_profile(request):
         form = ProfileForm(request.POST)
         if form.is_valid():
             profile = form.save(commit=False)
-            profile.user = request.user
+            profile.owner = request.user
             profile.save()
             messages.success(request, 'Profile created successfully!')
             return redirect('home')
@@ -311,7 +311,7 @@ def create_room(request):
         form = RoomForm(request.POST)
         if form.is_valid():
             room = form.save(commit=False)
-            room.user = request.user
+            room.owner = request.user
             room.save()
             messages.success(request, 'Room listing created successfully!')
             return redirect('room_detail', room_id=room.id)
@@ -361,8 +361,8 @@ def user_logout(request):
 
 @login_required
 def dashboard(request):
-    user_rooms = Room.objects.filter(user=request.user)[:5]
-    user_profiles = Profile.objects.filter(user=request.user)[:5]
+    user_rooms = Room.objects.filter(owner=request.user)[:5]
+    user_profiles = Profile.objects.filter(owner=request.user)[:5]
     
     return render(request, 'dashboard.html', {
         'rooms': user_rooms,
@@ -371,8 +371,8 @@ def dashboard(request):
 
 @login_required
 def my_listings(request):
-    user_rooms = Room.objects.filter(user=request.user)
-    user_profiles = Profile.objects.filter(user=request.user)
+    user_rooms = Room.objects.filter(owner=request.user)
+    user_profiles = Profile.objects.filter(owner=request.user)
     
     return render(request, 'my_listings.html', {
         'rooms': user_rooms,
