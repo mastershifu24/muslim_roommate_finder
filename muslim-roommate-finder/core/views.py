@@ -361,7 +361,7 @@ def user_logout(request):
 
 @login_required
 def dashboard(request):
-    user_rooms = Room.objects.filter(owner=request.user)[:5]
+    user_rooms = Room.objects.filter(owner__owner=request.user)[:5]
     user_profiles = Profile.objects.filter(owner=request.user)[:5]
     
     return render(request, 'dashboard.html', {
