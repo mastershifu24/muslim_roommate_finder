@@ -361,15 +361,15 @@ def user_logout(request):
 
 @login_required
 def dashboard(request):
+    profile = Profile.objects.get(user=request.user)
+    user_rooms = profile.rooms.all()[:5]
+    user_profiles = [profile]  # or [] if you don’t want it in a list
 
-    profile = Profile.objects.get(owner=request.user)
-    user_rooms = Room.objects.filter(owner=profile)[:5]
-    user_profile, created = Profile.objects.get_or_create(owner=request.user)
-    
     return render(request, 'dashboard.html', {
         'rooms': user_rooms,
-        'profiles': user_profile
+        'profiles': user_profiles,
     })
+
 
 @login_required
 def my_listings(request):
