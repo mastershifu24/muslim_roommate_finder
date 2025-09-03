@@ -361,14 +361,20 @@ def user_logout(request):
 
 @login_required
 def dashboard(request):
-    profile = Profile.objects.get(user=request.user)
+    # Get or create ensures no crash if profile is missing
+    profile, created = Profile.objects.get_or_create(user=request.user)
+
+    # Get their rooms (thanks to related_name='rooms')
     user_rooms = profile.rooms.all()[:5]
-    user_profiles = [profile]  # or [] if you don’t want it in a list
+
+    # For consistency with your template
+    user_profiles = [profile]
 
     return render(request, 'dashboard.html', {
         'rooms': user_rooms,
         'profiles': user_profiles,
     })
+
 
 
 @login_required
