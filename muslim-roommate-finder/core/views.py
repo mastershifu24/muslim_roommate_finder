@@ -378,12 +378,15 @@ def dashboard(request):
 
 @login_required
 def my_listings(request):
-    user_rooms = Room.objects.filter(owner=request.user)
-    user_profiles = Profile.objects.filter(owner=request.user)
+    try:
+        profile = Profile.objects.get(user=request.user)
+    except Profile.DoesNotExist:
+        return redirect('create_profile')
+    
+    user_rooms = Room.objects.filter(owner=profile)
     
     return render(request, 'my_listings.html', {
         'rooms': user_rooms,
-        'profiles': user_profiles
     })
 
 def advanced_search(request):
