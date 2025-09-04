@@ -101,4 +101,13 @@
               <div class="card-body">
                 <h6 class="text-muted">{{ profile.city }} | {{ profile.get_gender_display }}</h6>
                 {% if profile.bio %}<p>{{ profile.bio }}</p>{% endif %}
-                <small
+                <small>
+                    <strong>Contact:</strong>{{ profile.contact_email}}
+                </small>
+            </div>
+        </div>
+    </a>
+</div>
+{% endfor %}
+</div>
+{% endif %}
