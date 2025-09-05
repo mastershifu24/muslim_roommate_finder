@@ -1,0 +1,70 @@
+/* Reset */
+body, h1, h2, h3, p, ul, li, input, button {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* General body */
+  body {
+    background-color: #f7f9fc;
+    color: #333;
+    line-height: 1.6;
+    padding: 20px;
+  }
+  
+  /* Navbar */
+  .navbar {
+    background: #00695c;
+    color: #fff;
+    padding: 15px;
+  }
+  .navbar a {
+    color: #fff;
+    margin-right: 15px;
+    text-decoration: none;
+  }
+  .navbar a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Container */
+  .container {
+    max-width: 800px;
+    margin: 30px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  /* Buttons */
+  button, .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border: none;
+    background: #2196f3;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  button:hover, .btn:hover {
+    background: #1976d2;
+  }
+  
+  /* Forms */
+  form input, form select, form textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  form label {
+    font-weight: bold;
+    margin-top: 10px;
+    display: block;
+  }
+  

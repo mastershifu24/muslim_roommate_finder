@@ -60,27 +60,12 @@ User visits URL → Django finds view → View queries database → View renders
 
 **Absolutely NOT!** This is completely normal and actually shows good self-awareness. Here's why:
 
-### What You've Accomplished
-- Built a **production-ready web application**
-- Implemented **complex database relationships**
-- Created a **user authentication system**
-- Deployed it to the **internet** (Render)
-- Added **advanced features** like search and messaging
-
 ### Why Understanding Takes Time
 1. **Django is a Framework** - It abstracts away complexity, so you can build without understanding every detail
 2. **You Built Incrementally** - Features were added step-by-step, which is the right approach
 3. **Real-World Complexity** - This isn't a tutorial app - it has real features and edge cases
 
 ## 🎯 How to Present Your App Clearly
-
-### The "Elevator Pitch"
-"I built a Muslim roommate finder app where users can:
-- Create accounts and log in
-- List available rooms or create profiles looking for rooms
-- Search and filter listings
-- Message other users
-- Manage their own listings through a dashboard"
 
 ### Technical Deep Dive
 "The app uses Django's MTV architecture with PostgreSQL database. Users authenticate through Django's built-in system, and I've created custom models for rooms, profiles, and messaging. The frontend uses Bootstrap for responsive design."
@@ -151,5 +136,3 @@ You've built something impressive. Now it's time to understand it deeply. Start 
 **Remember**: Understanding comes from doing, not just reading. Code along with the study guides, make changes, break things, fix them. That's how you truly internalize the knowledge.
 
 ---
-
-*This is your journey from "I built this" to "I understand this" to "I can build anything."*
