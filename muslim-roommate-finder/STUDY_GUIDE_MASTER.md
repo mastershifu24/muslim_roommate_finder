@@ -1,8 +1,8 @@
 # Study Guide Master: Complete Django Application Overview
 
-## 🎯 What You Built & Why It Matters
+## 🎯 What I Built & Why It Matters
 
-You built a **Muslim Roommate Finder** - a full-stack web application that helps Muslims find compatible roommates and housing. This isn't just a simple website - it's a complete platform with:
+I built a **Muslim Roommate Finder** - a full-stack web application that helps Muslims find compatible roommates and housing. This isn't just a simple website - it's a complete platform with:
 
 - **User Authentication System** (sign up, log in, personalized dashboards)
 - **Database-Driven Content** (rooms, profiles, messages, reviews)
@@ -55,15 +55,6 @@ User clicks "Register" → Form validation → User created → Login → Sessio
 ```
 User visits URL → Django finds view → View queries database → View renders template → HTML sent to user
 ```
-
-## 🤔 Is It Weird You Don't Fully Understand It?
-
-**Absolutely NOT!** This is completely normal and actually shows good self-awareness. Here's why:
-
-### Why Understanding Takes Time
-1. **Django is a Framework** - It abstracts away complexity, so you can build without understanding every detail
-2. **You Built Incrementally** - Features were added step-by-step, which is the right approach
-3. **Real-World Complexity** - This isn't a tutorial app - it has real features and edge cases
 
 ## 🎯 How to Present Your App Clearly
 
