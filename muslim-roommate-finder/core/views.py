@@ -319,7 +319,7 @@ def create_room(request):
             messages.error(request, 'Please correct the errors below.')
     else:
         form = RoomForm()
-    return render(request, 'templates/create_room.html', {'form': form})
+    return render(request, 'create_room.html', {'form': form})
 
 def register(request):
     if request.method == 'POST':
