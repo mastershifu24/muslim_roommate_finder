@@ -308,10 +308,10 @@ def create_profile(request):
 @login_required
 def create_room(request):
     if request.method == 'POST':
-        form = RoomForm(request.POST)
+        form = RoomForm(request.POST, request.FILES)
         if form.is_valid():
             room = form.save(commit=False)
-            room.owner = request.user
+            room.owner = request.user.profile #assigning profile instead of user
             room.save()
             messages.success(request, 'Room listing created successfully!')
             return redirect('room_detail', room_id=room.id)
@@ -319,7 +319,7 @@ def create_room(request):
             messages.error(request, 'Please correct the errors below.')
     else:
         form = RoomForm()
-    return render(request, 'create_room.html', {'form': form})
+    return render(request, 'templates/create_room.html', {'form': form})
 
 def register(request):
     if request.method == 'POST':
