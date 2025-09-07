@@ -21,6 +21,8 @@ from core.views import (
     contact_profile, room_detail, create_room, register, user_login, 
     user_logout, my_listings, dashboard
 )
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -38,3 +40,6 @@ urlpatterns = [
     path('rooms/<int:room_id>/', room_detail, name='room_detail'),
     path('rooms/create/', create_room, name='create_room'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
