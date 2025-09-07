@@ -1,50 +1,31 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ room.title }}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        .badge-gap { gap: .25rem; }
-    </style>
-    </head>
-<body class="container py-4">
-    <a href="{% url 'home' %}" class="btn btn-link">← Back to Home</a>
-    <div class="card">
-        <div class="card-header bg-success text-white">
-            <h2 class="mb-0">{{ room.title }}</h2>
-        </div>
-        <div class="card-body">
-            <p class="text-muted mb-1"><strong>Location:</strong> {{ room.city }}{% if room.neighborhood %} • {{ room.neighborhood }}{% endif %}</p>
-            {% if room.rent %}
-                <p class="mb-1"><strong>Rent:</strong> ${{ room.rent }}</p>
-            {% endif %}
-            {% if room.available_from %}
-                <p class="mb-3"><strong>Available from:</strong> {{ room.available_from }}</p>
-            {% endif %}
+{% extends "base.html" %}
 
-            {% if room.description %}
-                <p>{{ room.description }}</p>
-            {% endif %}
+{% block title %}{{ room.title }} - Muslim Roommate Finder{% endblock %}
 
-            <div class="d-flex flex-wrap badge-gap mb-3">
-                {% if room.halal_kitchen %}<span class="badge bg-success">Halal Kitchen</span>{% endif %}
-                {% if room.prayer_friendly %}<span class="badge bg-info">Prayer Friendly</span>{% endif %}
-                {% if room.guests_allowed %}<span class="badge bg-warning">Guests Allowed</span>{% endif %}
-            </div>
+{% block content %}
+<a href="{% url 'home' %}" class="btn btn-link">← Back to Home</a>
 
-            {% if room.contact_email %}
-                <p><strong>Contact:</strong> {{ room.contact_email }}</p>
-            {% endif %}
+<div class="card">
+  <div class="card-header bg-success text-white">
+    <h2 class="mb-0">{{ room.title }}</h2>
+  </div>
+  <div class="card-body">
+    {% if room.image %}
+      <img src="{{ room.image.url }}" class="img-fluid mb-3 rounded" alt="Room image">
+    {% endif %}
+    <p class="text-muted mb-1"><strong>Location:</strong> {{ room.city }}{% if room.neighborhood %} • {{ room.neighborhood }}{% endif %}</p>
+    {% if room.rent %}<p class="mb-1"><strong>Rent:</strong> ${{ room.rent }}</p>{% endif %}
+    {% if room.available_from %}<p class="mb-3"><strong>Available from:</strong> {{ room.available_from }}</p>{% endif %}
+    {% if room.description %}<p>{{ room.description }}</p>{% endif %}
 
-            {% if room.owner %}
-                <p class="text-muted">Posted by: <a href="{% url 'profile_detail' room.owner.id %}">{{ room.owner.name }}</a></p>
-            {% endif %}
-        </div>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      {% if room.halal_kitchen %}<span class="badge bg-success">Halal Kitchen</span>{% endif %}
+      {% if room.prayer_friendly %}<span class="badge bg-info">Prayer Friendly</span>{% endif %}
+      {% if room.guests_allowed %}<span class="badge bg-warning">Guests Allowed</span>{% endif %}
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-
-
+    {% if room.contact_email %}<p><strong>Contact:</strong> {{ room.contact_email }}</p>{% endif %}
+    {% if room.owner %}<p class="text-muted">Posted by: <a href="{% url 'profile_detail' room.owner.id %}">{{ room.owner.name }}</a></p>{% endif %}
+  </div>
+</div>
+{% endblock %}

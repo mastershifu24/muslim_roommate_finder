@@ -22,42 +22,7 @@
   <div class="card mb-4">
     <div class="card-body">
       <form method="get" class="row g-3">
-        <div class="col-md-4">
-          <label for="search" class="form-label">Search</label>
-          <input type="text" class="form-control" id="search" name="search"
-                 value="{{ search_query }}" placeholder="Search by name, city, or bio...">
-        </div>
-        <div class="col-md-2">
-          <label for="city" class="form-label">City</label>
-          <select class="form-select" id="city" name="city">
-            <option value="">All Cities</option>
-            {% for city in cities %}
-              <option value="{{ city }}" {% if city_filter == city %}selected{% endif %}>{{ city }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="col-md-2">
-          <label for="gender" class="form-label">Gender</label>
-          <select class="form-select" id="gender" name="gender">
-            <option value="">All Genders</option>
-            <option value="M" {% if gender_filter == 'M' %}selected{% endif %}>Male</option>
-            <option value="F" {% if gender_filter == 'F' %}selected{% endif %}>Female</option>
-          </select>
-        </div>
-        <div class="col-md-2">
-          <label for="preference" class="form-label">Preference</label>
-          <select class="form-select" id="preference" name="preference">
-            <option value="">All Preferences</option>
-            <option value="halal_kitchen" {% if preference_filter == 'halal_kitchen' %}selected{% endif %}>Halal Kitchen</option>
-            <option value="prayer_friendly" {% if preference_filter == 'prayer_friendly' %}selected{% endif %}>Prayer Friendly</option>
-            <option value="guests_allowed" {% if preference_filter == 'guests_allowed' %}selected{% endif %}>Guests Allowed</option>
-            <option value="looking_for_room" {% if preference_filter == 'looking_for_room' %}selected{% endif %}>Looking for Room</option>
-            <option value="offering_room" {% if preference_filter == 'offering_room' %}selected{% endif %}>Offering Room</option>
-          </select>
-        </div>
-        <div class="col-md-2 d-flex align-items-end">
-          <button type="submit" class="btn btn-primary w-100">Search</button>
-        </div>
+        <!-- ... your existing search/filter fields ... -->
       </form>
       {% if search_query or city_filter or gender_filter or preference_filter %}
         <div class="mt-3">
@@ -77,6 +42,9 @@
             <div class="card h-100 border-success">
               <div class="card-header bg-success text-white">{{ room.title }}</div>
               <div class="card-body">
+                {% if room.image %}
+                  <img src="{{ room.image.url }}" class="img-fluid mb-2 rounded" alt="Room image">
+                {% endif %}
                 <h6 class="text-muted">{{ room.city }}{% if room.neighborhood %} • {{ room.neighborhood }}{% endif %}</h6>
                 {% if room.rent %}<p><strong>Rent:</strong> ${{ room.rent }}</p>{% endif %}
                 {% if room.description %}<p>{{ room.description }}</p>{% endif %}
@@ -101,14 +69,12 @@
               <div class="card-body">
                 <h6 class="text-muted">{{ profile.city }} | {{ profile.get_gender_display }}</h6>
                 {% if profile.bio %}<p>{{ profile.bio }}</p>{% endif %}
-                <small>
-                    <strong>Contact:</strong>{{ profile.contact_email}}
-                </small>
+                <small><strong>Contact:</strong> {{ profile.contact_email }}</small>
+              </div>
             </div>
+          </a>
         </div>
-    </a>
-</div>
-{% endfor %}
-</div>
-{% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
 {% endblock %}
