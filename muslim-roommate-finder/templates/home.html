@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load static %}
+
 {% block title %}Home - Muslim Roommate Finder{% endblock %}
 
 {% block content %}
@@ -44,6 +46,8 @@
               <div class="card-body">
                 {% if room.image %}
                   <img src="{{ room.image.url }}" class="img-fluid mb-2 rounded" alt="Room image">
+                {% else %}
+                  <img src="{% static 'images/no-image.jpg' %}" class="img-fluid mb-2 rounded" alt="No image available">
                 {% endif %}
                 <h6 class="text-muted">{{ room.city }}{% if room.neighborhood %} • {{ room.neighborhood }}{% endif %}</h6>
                 {% if room.rent %}<p><strong>Rent:</strong> ${{ room.rent }}</p>{% endif %}
