@@ -114,26 +114,22 @@ class ContactAdmin(admin.ModelAdmin):
     
     # Fields to display in the list view (table of all contacts)
     list_display = [
-        'sender_name',        # Show sender name
-        'sender_email',       # Show sender email
+        'name',        # Show sender name
+        'email',       # Show sender email
         'profile',            # Show which profile was contacted
         'get_short_message',  # Show shortened message
-        'created_at',         # Show when contact was made
-        'is_read',            # Show read status
     ]
     
     # Fields that can be used to search/filter contacts
     list_filter = [
-        'is_read',            # Filter by read status (Read/Unread)
-        'created_at',         # Filter by date
         'profile__city',      # Filter by profile city
         'profile__gender',    # Filter by profile gender
     ]
     
     # Fields that can be searched
     search_fields = [
-        'sender_name',        # Search by sender name
-        'sender_email',       # Search by sender email
+        'name',        # Search by sender name
+        'email',       # Search by sender email
         'message',            # Search in message content
         'profile__name',      # Search by profile name
     ]
@@ -142,7 +138,7 @@ class ContactAdmin(admin.ModelAdmin):
     fieldsets = (
         # Contact Information section
         ('Contact Information', {
-            'fields': ('sender_name', 'sender_email')
+            'fields': ('name', 'email')
         }),
         # Message section
         ('Message', {
@@ -151,7 +147,7 @@ class ContactAdmin(admin.ModelAdmin):
         }),
         # Profile and Status section
         ('Profile & Status', {
-            'fields': ('profile', 'is_read', 'created_at'),
+            'fields': ('profile'),
             'classes': ('collapse',)  # Makes this section collapsible
         }),
     )
@@ -160,15 +156,8 @@ class ContactAdmin(admin.ModelAdmin):
     list_per_page = 25
     
     # Fields that can be edited directly in the list view
-    list_editable = [
-        'is_read',  # Can check/uncheck read status directly in list
+    list_editable = [ # Can check/uncheck read status directly in list
     ]
-    
-    # Order contacts by most recent first
-    ordering = ('-created_at',)
-    
-    # Make created_at read-only (shouldn't be editable)
-    readonly_fields = ['created_at']
     
     # Add custom actions
     actions = ['mark_as_read', 'mark_as_unread']
@@ -215,8 +204,7 @@ class RoomAdmin(admin.ModelAdmin):
         'neighborhood',
         'owner__name',
     ]
-    readonly_fields = ['created_at', 'updated_at']
-    ordering = ('-created_at',)
+    readonly_fields = ['updated_at']
 
 
 @admin.register(RoomType)
@@ -234,11 +222,9 @@ class RoomImageAdmin(admin.ModelAdmin):
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ['sender', 'recipient', 'subject', 'room', 'created_at', 'is_read']
-    list_filter = ['is_read', 'created_at', 'room__city']
+    list_display = ['sender', 'recipient', 'subject', 'room']
+    list_filter = ['room__city']
     search_fields = ['sender__username', 'recipient__username', 'subject', 'content']
-    readonly_fields = ['created_at']
-    ordering = ('-created_at',)
 
 
 @admin.register(RoomReview)
@@ -246,8 +232,6 @@ class RoomReviewAdmin(admin.ModelAdmin):
     list_display = ['room', 'reviewer', 'rating', 'created_at']
     list_filter = ['rating', 'created_at', 'room__city']
     search_fields = ['room__title', 'reviewer__username', 'review_text']
-    readonly_fields = ['created_at']
-    ordering = ('-created_at',)
 
 
 @admin.register(RoomAvailability)
@@ -281,8 +265,7 @@ class RoomVerificationAdmin(admin.ModelAdmin):
 
 @admin.register(RoomFavorite)
 class RoomFavoriteAdmin(admin.ModelAdmin):
-    list_display = ['user', 'room', 'created_at']
-    list_filter = ['created_at', 'room__city']
+    list_display = ['user', 'room']
+    list_filter = ['room__city']
     search_fields = ['user__username', 'room__title']
-    readonly_fields = ['created_at']
-    ordering = ('-created_at',)
+
