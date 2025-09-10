@@ -135,7 +135,7 @@ class RoomForm(forms.ModelForm):
         fields = [
             'owner', 'title', 'description',
             'city', 'neighborhood',
-            'rent', 'available_from',
+            'price', 
             'halal_kitchen', 'prayer_friendly', 'guests_allowed',
             'contact_email',
         ]
