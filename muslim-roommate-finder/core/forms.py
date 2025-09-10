@@ -155,9 +155,8 @@ class RoomForm(forms.ModelForm):
 class RoomImageForm(forms.ModelForm):
     class Meta:
         model = RoomImage
-        fields = ['image', 'caption', 'is_primary']
+        fields = ['image', 'is_primary']  # remove 'caption' if it doesn't exist
         widgets = {
             'image': forms.FileInput(attrs={'class': 'form-control'}),
-            'caption': forms.TextInput(attrs={'class': 'form-control'}),
             'is_primary': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
