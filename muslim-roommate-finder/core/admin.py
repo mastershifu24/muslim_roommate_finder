@@ -215,9 +215,9 @@ class RoomTypeAdmin(admin.ModelAdmin):
 
 @admin.register(RoomImage)
 class RoomImageAdmin(admin.ModelAdmin):
-    list_display = ['room', 'caption', 'is_primary', 'image']
+    list_display = ['room', 'is_primary', 'image']
     list_filter = ['is_primary', 'room__city']
-    search_fields = ['room__title', 'caption']
+    search_fields = ['room__title']
 
 
 @admin.register(Message)

@@ -87,8 +87,8 @@ class ContactForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         
         # Add help text to explain the contact process
-        self.fields['sender_name'].help_text = 'This will be shared with the profile owner.'
-        self.fields['sender_email'].help_text = 'This will be shared with the profile owner so they can reply to you.'
+        self.fields['name'].help_text = 'This will be shared with the profile owner.'
+        self.fields['email'].help_text = 'This will be shared with the profile owner so they can reply to you.'
         self.fields['message'].help_text = 'Be respectful and include relevant information about yourself and your roommate preferences.'
     
     def clean_message(self):
@@ -118,7 +118,7 @@ class ContactForm(forms.ModelForm):
         """
         Custom validation for the sender name field.
         """
-        name = self.cleaned_data.get('sender_name')
+        name = self.cleaned_data.get('name')
         
         # Check if name contains only letters and spaces
         if not name.replace(' ', '').replace('-', '').replace("'", '').isalpha():

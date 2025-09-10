@@ -58,11 +58,11 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "sender_name",
+                    "name",
                     models.CharField(max_length=100, verbose_name="Your name"),
                 ),
                 (
-                    "sender_email",
+                    "email",
                     models.EmailField(max_length=254, verbose_name="Your email"),
                 ),
                 ("message", models.TextField(verbose_name="Your message")),

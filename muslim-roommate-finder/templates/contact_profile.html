@@ -74,24 +74,24 @@
                         {% csrf_token %}
                         
                         <div class="mb-3">
-                            <label for="{{ form.sender_name.id_for_label }}" class="form-label">{{ form.sender_name.label }}</label>
-                            {{ form.sender_name }}
-                            {% if form.sender_name.help_text %}
-                                <div class="form-text">{{ form.sender_name.help_text }}</div>
+                            <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                            {{ form.name }}
+                            {% if form.name.help_text %}
+                                <div class="form-text">{{ form.name.help_text }}</div>
                             {% endif %}
-                            {% if form.sender_name.errors %}
-                                <div class="text-danger">{{ form.sender_name.errors }}</div>
+                            {% if form.name.errors %}
+                                <div class="text-danger">{{ form.name.errors }}</div>
                             {% endif %}
                         </div>
 
                         <div class="mb-3">
-                            <label for="{{ form.sender_email.id_for_label }}" class="form-label">{{ form.sender_email.label }}</label>
-                            {{ form.sender_email }}
-                            {% if form.sender_email.help_text %}
-                                <div class="form-text">{{ form.sender_email.help_text }}</div>
+                            <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                            {{ form.email }}
+                            {% if form.email.help_text %}
+                                <div class="form-text">{{ form.email.help_text }}</div>
                             {% endif %}
-                            {% if form.sender_email.errors %}
-                                <div class="text-danger">{{ form.sender_email.errors }}</div>
+                            {% if form.email.errors %}
+                                <div class="text-danger">{{ form.email.errors }}</div>
                             {% endif %}
                         </div>
 
