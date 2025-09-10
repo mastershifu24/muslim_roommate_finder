@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "rent",
+                    "price",
                     models.DecimalField(
                         blank=True, decimal_places=2, max_digits=8, null=True
                     ),
