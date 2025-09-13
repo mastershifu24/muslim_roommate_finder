@@ -294,7 +294,7 @@ def create_profile(request):
         form = ProfileForm(request.POST)
         if form.is_valid():
             profile = form.save(commit=False)
-            profile.owner = request.user
+            profile.user = request.user
             profile.save()
             messages.success(request, 'Profile created successfully!')
             return redirect('home')
@@ -311,7 +311,7 @@ def create_room(request):
         form = RoomForm(request.POST, request.FILES)
         if form.is_valid():
             room = form.save(commit=False)
-            room.owner = request.user.profile #assigning profile instead of user
+            room.user = request.user.profile #assigning profile instead of user
             room.save()
             messages.success(request, 'Room listing created successfully!')
             return redirect('room_detail', room_id=room.id)
@@ -383,7 +383,7 @@ def my_listings(request):
     except Profile.DoesNotExist:
         return redirect('create_profile')
     
-    user_rooms = Room.objects.filter(owner=profile)
+    user_rooms = Room.objects.filter(user=profile)
     
     return render(request, 'my_listings.html', {
         'rooms': user_rooms,

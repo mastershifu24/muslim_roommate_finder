@@ -17,7 +17,7 @@ class Amenity(models.Model):
         return self.name
 
 class Room(models.Model):
-    owner = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="rooms")
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="rooms")
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     room_type = models.ForeignKey(RoomType, on_delete=models.SET_NULL, null=True, blank=True)

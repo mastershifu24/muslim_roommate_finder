@@ -28,9 +28,9 @@
                         {% csrf_token %}
 
                         <div class="mb-3">
-                            <label for="{{ form.owner.id_for_label }}" class="form-label">Owner (optional)</label>
-                            {{ form.owner }}
-                            {% if form.owner.errors %}<div class="text-danger">{{ form.owner.errors }}</div>{% endif %}
+                            <label for="{{ form.user.id_for_label }}" class="form-label">Owner (optional)</label>
+                            {{ form.user }}
+                            {% if form.user.errors %}<div class="text-danger">{{ form.user.errors }}</div>{% endif %}
                         </div>
 
                         <div class="mb-3">

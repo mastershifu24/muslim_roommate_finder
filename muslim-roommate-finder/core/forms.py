@@ -44,6 +44,7 @@ class ProfileForm(forms.ModelForm):
             'prayer_friendly': 'Prefer prayer-friendly environment',
             'guests_allowed': 'Allow guests in shared spaces',
         }
+        exclude = ['user']
 
 class ContactForm(forms.ModelForm):
     """
@@ -133,14 +134,14 @@ class RoomForm(forms.ModelForm):
     class Meta:
         model = Room
         fields = [
-            'owner', 'title', 'description',
+            'user', 'title', 'description',
             'city', 'neighborhood',
             'price', 
             'halal_kitchen', 'prayer_friendly', 'guests_allowed',
             'contact_email',
         ]
         widgets = {
-            'owner': forms.Select(attrs={'class': 'form-select'}),
+            'user': forms.Select(attrs={'class': 'form-select'}),
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Room in Downtown Charleston'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'city': forms.TextInput(attrs={'class': 'form-control'}),
