@@ -1,84 +1,63 @@
 {% extends "base.html" %}
-
 {% load static %}
 
 {% block title %}Home - Muslim Roommate Finder{% endblock %}
 
 {% block content %}
-  <!-- Quick Filter Buttons -->
-  <div class="mb-3">
-    <div class="btn-group" role="group">
-      <a href="{% url 'home' %}" class="btn btn-outline-primary {% if not preference_filter %}active{% endif %}">
-        Show All
-      </a>
-      <a href="?preference=offering_room" class="btn btn-outline-success {% if preference_filter == 'offering_room' %}active{% endif %}">
-        🏠 Available Rooms
-      </a>
-      <a href="?preference=looking_for_room" class="btn btn-outline-info {% if preference_filter == 'looking_for_room' %}active{% endif %}">
-        👥 Looking for Rooms
-      </a>
-    </div>
+<!-- Quick Filter Buttons -->
+<div class="mb-3">
+  <div class="btn-group" role="group">
+    <a href="{% url 'home' %}" class="btn btn-outline-primary {% if not preference_filter %}active{% endif %}">Show All</a>
+    <a href="?preference=offering_room" class="btn btn-outline-success {% if preference_filter == 'offering_room' %}active{% endif %}">🏠 Available Rooms</a>
+    <a href="?preference=looking_for_room" class="btn btn-outline-info {% if preference_filter == 'looking_for_room' %}active{% endif %}">👥 Looking for Rooms</a>
   </div>
+</div>
 
-  <!-- Search + Filters -->
-  <div class="card mb-4">
-    <div class="card-body">
-      <form method="get" class="row g-3">
-        <!-- ... your existing search/filter fields ... -->
-      </form>
-      {% if search_query or city_filter or gender_filter or preference_filter %}
-        <div class="mt-3">
-          <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-sm">Clear All Filters</a>
-        </div>
-      {% endif %}
+<!-- Available Rooms -->
+{% if available_rooms %}
+<h3 class="text-success mb-3">🏠 Available Rooms ({{ rooms_count }})</h3>
+<div class="row">
+  {% for room in available_rooms %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 border-success">
+        <a href="{% url 'room_detail' room.id %}" class="text-decoration-none text-dark">
+          <div class="card-header bg-success text-white">{{ room.title }}</div>
+          <div class="card-body">
+            {% if room.image %}
+              <img src="{{ room.image.url }}" class="img-fluid mb-2 rounded" alt="Room image">
+            {% else %}
+              <img src="{% static 'images/no-image.jpg' %}" class="img-fluid mb-2 rounded" alt="No image available">
+            {% endif %}
+            <h6 class="text-muted">{{ room.city }}{% if room.neighborhood %} • {{ room.neighborhood }}{% endif %}</h6>
+            {% if room.rent %}<p><strong>Rent:</strong> ${{ room.rent }}</p>{% endif %}
+            {% if room.description %}<p>{{ room.description }}</p>{% endif %}
+            <small class="text-muted"><strong>Contact:</strong> {{ room.user.name }}</small>
+          </div>
+        </a>
+      </div>
     </div>
-  </div>
+  {% endfor %}
+</div>
+{% endif %}
 
-  <!-- Available Rooms -->
-  {% if available_rooms %}
-    <h3 class="text-success mb-3">🏠 Available Rooms ({{ rooms_count }})</h3>
-    <div class="row">
-      {% for room in available_rooms %}
-        <div class="col-md-4 mb-4">
-          <a href="{% url 'room_detail' room.id %}" class="text-decoration-none">
-            <div class="card h-100 border-success">
-              <div class="card-header bg-success text-white">{{ room.title }}</div>
-              <div class="card-body">
-                {% if room.image %}
-                  <img src="{{ room.image.url }}" class="img-fluid mb-2 rounded" alt="Room image">
-                {% else %}
-                  <img src="{% static 'images/no-image.jpg' %}" class="img-fluid mb-2 rounded" alt="No image available">
-                {% endif %}
-                <h6 class="text-muted">{{ room.city }}{% if room.neighborhood %} • {{ room.neighborhood }}{% endif %}</h6>
-                {% if room.rent %}<p><strong>Rent:</strong> ${{ room.rent }}</p>{% endif %}
-                {% if room.description %}<p>{{ room.description }}</p>{% endif %}
-                <small class="text-muted"><strong>Contact:</strong> {{ room.contact_email }}</small>
-              </div>
-            </div>
-          </a>
-        </div>
-      {% endfor %}
+<!-- People Looking for Rooms -->
+{% if profiles %}
+<h3 class="text-primary mb-3">👥 People Looking for Rooms ({{ profile_count }})</h3>
+<div class="row">
+  {% for profile in profiles %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 border-primary">
+        <a href="{{ profile.get_absolute_url }}" class="text-decoration-none text-dark">
+          <div class="card-header bg-primary text-white">{{ profile.name }}, {{ profile.age }}</div>
+          <div class="card-body">
+            <h6 class="text-muted">{{ profile.city }} | {{ profile.get_gender_display }}</h6>
+            {% if profile.bio %}<p>{{ profile.bio }}</p>{% endif %}
+            <small><strong>Contact:</strong> {{ profile.contact_email }}</small>
+          </div>
+        </a>
+      </div>
     </div>
-  {% endif %}
-
-  <!-- People Looking for Rooms -->
-  {% if profiles %}
-    <h3 class="text-primary mb-3">👥 People Looking for Rooms ({{ profile_count }})</h3>
-    <div class="row">
-      {% for profile in profiles %}
-        <div class="col-md-4 mb-4">
-          <a href="{{ profile.get_absolute_url }}" class="text-decoration-none">
-            <div class="card h-100 border-primary">
-              <div class="card-header bg-primary text-white">{{ profile.name }}, {{ profile.age }}</div>
-              <div class="card-body">
-                <h6 class="text-muted">{{ profile.city }} | {{ profile.get_gender_display }}</h6>
-                {% if profile.bio %}<p>{{ profile.bio }}</p>{% endif %}
-                <small><strong>Contact:</strong> {{ profile.contact_email }}</small>
-              </div>
-            </div>
-          </a>
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
 {% endblock %}

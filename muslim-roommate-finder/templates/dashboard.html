@@ -3,47 +3,50 @@
 {% block title %}Dashboard - Muslim Roommate Finder{% endblock %}
 
 {% block content %}
-  <h1 class="mb-4">Welcome, {{ user.username }}!</h1>
+<h1 class="mb-4">Welcome, {{ user.username }}!</h1>
 
-  <div class="row">
-    <div class="col-md-6">
-      <div class="card mb-3">
-        <div class="card-header">My Room Listings</div>
-        <div class="card-body">
-          {% if rooms %}
-            {% for room in rooms %}
-              <div class="border-bottom pb-2 mb-2">
-                <h6><a href="{% url 'room_detail' room.id %}">{{ room.title }}</a></h6>
-                <small class="text-muted">{{ room.city }} • ${{ room.rent }}</small>
-              </div>
-            {% endfor %}
-            <a href="{% url 'my_listings' %}" class="btn btn-sm btn-outline-primary">View All</a>
-          {% else %}
-            <p class="text-muted">No room listings yet.</p>
-            <a href="{% url 'create_room' %}" class="btn btn-success">List a Room</a>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <div class="card mb-3">
-        <div class="card-header">My Profiles</div>
-        <div class="card-body">
-          {% if profiles %}
-            {% for profile in profiles %}
-              <div class="border-bottom pb-2 mb-2">
-                <h6><a href="{% url 'profile_detail' profile.id %}">{{ profile.name }}</a></h6>
-                <small class="text-muted">{{ profile.city }} • {{ profile.get_gender_display }}</small>
-              </div>
-            {% endfor %}
-            <a href="{% url 'create_profile' %}" class="btn btn-sm btn-outline-primary">Add Another</a>
-          {% else %}
-            <p class="text-muted">No profiles yet.</p>
-            <a href="{% url 'create_profile' %}" class="btn btn-primary">Create Profile</a>
-          {% endif %}
-        </div>
+<div class="row">
+  <!-- Room Listings -->
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header">My Room Listings</div>
+      <div class="card-body">
+        {% if rooms %}
+          {% for room in rooms %}
+            <div class="border-bottom pb-2 mb-2">
+              <h6><a href="{% url 'room_detail' room.id %}">{{ room.title }}</a></h6>
+              <small class="text-muted">{{ room.city }}{% if room.neighborhood %} • {{ room.neighborhood }}{% endif %} • ${{ room.rent }}</small>
+            </div>
+          {% endfor %}
+          <a href="{% url 'my_listings' %}" class="btn btn-sm btn-outline-primary">View All</a>
+        {% else %}
+          <p class="text-muted">No room listings yet.</p>
+          <a href="{% url 'create_room' %}" class="btn btn-success">List a Room</a>
+        {% endif %}
       </div>
     </div>
   </div>
+
+  <!-- Profiles -->
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header">My Profiles</div>
+      <div class="card-body">
+        {% if profiles %}
+          {% for profile in profiles %}
+            <div class="border-bottom pb-2 mb-2">
+              <h6><a href="{{ profile.get_absolute_url }}">{{ profile.name }}</a></h6>
+              <small class="text-muted">{{ profile.city }}{% if profile.neighborhood %} • {{ profile.neighborhood }}{% endif %}</small>
+              <br><small class="text-info">{{ profile.get_gender_display }} • Age {{ profile.age }}</small>
+            </div>
+          {% endfor %}
+          <a href="{% url 'create_profile' %}" class="btn btn-sm btn-outline-primary">Add Another</a>
+        {% else %}
+          <p class="text-muted">No profiles yet.</p>
+          <a href="{% url 'create_profile' %}" class="btn btn-primary">Create Profile</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

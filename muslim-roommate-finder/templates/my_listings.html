@@ -32,22 +32,23 @@
                 </div>
                 <div class="card-body">
                     {% if rooms %}
-                        {% for room in rooms %}
-                            <div class="border-bottom pb-3 mb-3">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <h6><a href="{% url 'room_detail' room.id %}">{{ room.title }}</a></h6>
-                                        <small class="text-muted">{{ room.city }}{% if room.neighborhood %} • {{ room.neighborhood }}{% endif %}</small>
-                                        {% if room.rent %}
-                                            <br><small class="text-success">${{ room.rent }}/month</small>
-                                        {% endif %}
-                                    </div>
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{% url 'room_detail' room.id %}" class="btn btn-outline-primary">View</a>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
+                    {% for room in rooms %}
+                    <div class="border-bottom pb-3 mb-3">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                          <h6><a href="{% url 'room_detail' room.id %}">{{ room.title }}</a></h6>
+                          <small class="text-muted">{{ room.city }}{% if room.neighborhood %} • {{ room.neighborhood }}{% endif %}</small>
+                          {% if room.price %}
+                            <br><small class="text-success">${{ room.price }}/month</small>
+                          {% endif %}
+                          <br><small class="text-muted">Owner: {{ room.user.name }}</small>  <!-- <- Add here -->
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                          <a href="{% url 'room_detail' room.id %}" class="btn btn-outline-primary">View</a>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}                  
                     {% else %}
                         <p class="text-muted">No room listings yet.</p>
                         <a href="{% url 'create_room' %}" class="btn btn-success">List a Room</a>

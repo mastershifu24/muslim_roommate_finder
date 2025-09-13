@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.text import slugify
+from django.urls import reverse
 
 # Profile + RoommateProfile
 class Profile(models.Model):
@@ -21,6 +22,8 @@ class Profile(models.Model):
     slug = models.SlugField(unique=True, blank=True)
 
     # methods (e.g., save, get_age_range, __str__) stay here
+    def get_absolute_url(self):
+        return reverse("profile_detail", kwargs={"profile_id": self.id})
 
 class RoommateProfile(models.Model):
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE, related_name="roommate_profile")
