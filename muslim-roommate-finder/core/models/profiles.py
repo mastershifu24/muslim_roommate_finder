@@ -21,7 +21,10 @@ class Profile(models.Model):
     contact_email = models.EmailField(blank=True)
     slug = models.SlugField(unique=True, blank=True)
 
-    # methods (e.g., save, get_age_range, __str__) stay here
+    def __str__(self):
+        return self.name  # <-- this will display the profile's name in dropdowns
+
+    # Optional: add get_absolute_url
     def get_absolute_url(self):
         return reverse("profile_detail", kwargs={"profile_id": self.id})
 
