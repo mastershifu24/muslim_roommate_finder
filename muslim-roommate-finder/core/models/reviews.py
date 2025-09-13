@@ -13,4 +13,4 @@ class RoomReview(models.Model):
         unique_together = ("room", "reviewer")
 
     def __str__(self):
-        return f"Review for {self.room.title} by {self.reviewer.name}"
+        return f"{self.reviewer.name} review of {self.room.title}: {self.rating}/5"

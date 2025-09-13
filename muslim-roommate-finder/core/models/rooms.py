@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.text import slugify
 from django.contrib.auth.models import User
 from .profiles import Profile
+from django.urls import reverse
 
 # Room-related models
 class RoomType(models.Model):
@@ -32,6 +33,11 @@ class Room(models.Model):
     contact_email = models.EmailField(blank=True)
 
     # methods (save, __str__) stay here
+    def __str__(self):
+        return f"{self.title} ({self.city})"
+
+    def get_absolute_url(self):
+        return reverse("room_detail", kwargs={"room_id": self.id})
 
 class RoomImage(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="images")
