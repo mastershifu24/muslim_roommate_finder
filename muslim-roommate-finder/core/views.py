@@ -8,70 +8,61 @@ from django.contrib.auth.models import User
 from .models import Profile, Room, Message
 from .forms import ProfileForm, ContactForm, RoomForm, UserRegistrationForm
 
+
 def home(request):
-    # Get search parameters from URL (e.g., ?city=NewYork&gender=M)
-    search_query = request.GET.get('search', '')  # Get 'search' parameter, default to empty string
-    city_filter = request.GET.get('city', '')  # Get 'city' parameter
-    neighborhood_filter = request.GET.get('neighborhood', '')  # Get 'neighborhood' parameter
-    gender_filter = request.GET.get('gender', '')  # Get 'gender' parameter
-    preference_filter = request.GET.get('preference', '')  # Get 'preference' parameter
-    age_min = request.GET.get('age_min', '') # Get 'age_min' parameter
-    age_max = request.GET.get('age_max', '') # Get 'age_max' parameter
-    charleston_only = request.GET.get('charleston_only', '') # Get 'charleston_only' paramete
-    
-    # Start with all profiles, optimize with select_related if needed later
+    """
+    Home page showing profiles and room listings with search and filters.
+    Supports filtering by city, neighborhood, gender, preferences, age range, and Charleston area.
+    """
+    search_query = request.GET.get('search', '')
+    city_filter = request.GET.get('city', '')
+    neighborhood_filter = request.GET.get('neighborhood', '')
+    gender_filter = request.GET.get('gender', '')
+    preference_filter = request.GET.get('preference', '')
+    age_min = request.GET.get('age_min', '')
+    age_max = request.GET.get('age_max', '')
+    charleston_only = request.GET.get('charleston_only', '')
+
+    # Filter Profiles
     profiles = Profile.objects.all()
-    
-    # Apply search filter (searches name, city, neighborhood, and bio)
+
     if search_query:
         profiles = profiles.filter(
-            Q(name__icontains=search_query) |  # Search in name (case-insensitive)
-            Q(city__icontains=search_query) |  # Search in city
-            Q(neighborhood__icontains=search_query) | # Search in neighborhood
-            Q(bio__icontains=search_query)     # Search in bio
+            Q(name__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(neighborhood__icontains=search_query) |
+            Q(bio__icontains=search_query)
         )
-    
-    # Apply city and location filter
+
     if city_filter:
         profiles = profiles.filter(city__icontains=city_filter)
     if neighborhood_filter:
         profiles = profiles.filter(neighborhood__icontains=neighborhood_filter)
-
-    #Charleston area filter
     if charleston_only:
         charleston_areas = ['Downtown', 'West Ashley', 'Mount Pleasant', 'James Island', 'Charleston County']
         profiles = profiles.filter(city__iregex=r'(' + '|'.join(charleston_areas) + ')')
-    
-    # Apply gender filter
     if gender_filter:
         profiles = profiles.filter(gender=gender_filter)
-
     if age_min:
         profiles = profiles.filter(age__gte=age_min)
     if age_max:
         profiles = profiles.filter(age__lte=age_max)
-    
-    # Apply preference filter
     if preference_filter:
-        if preference_filter == 'halal_kitchen':
-            profiles = profiles.filter(halal_kitchen=True)
-        elif preference_filter == 'prayer_friendly':
-            profiles = profiles.filter(prayer_friendly=True)
-        elif preference_filter == 'guests_allowed':
-            profiles = profiles.filter(guests_allowed=True)
-        elif preference_filter == 'looking_for_room':
-            profiles = profiles.filter(is_looking_for_room=True)
-        elif preference_filter == 'offering_room':
-            profiles = profiles.filter(is_looking_for_room=False)
-    
-    # Get unique cities and neighborhoods for dropdowns
-    cities = Profile.objects.values_list('city', flat=True).distinct().order_by('city')
-    neighborhoods = Profile.objects.values_list('neighborhood', flat=True).distinct().order_by('neighborhood')
-    
-    # Get available rooms from Room model
-    available_rooms = Room.objects.all()
+        # Map preference filters to Profile fields
+        pref_map = {
+            'halal_kitchen': 'halal_kitchen',
+            'prayer_friendly': 'prayer_friendly',
+            'guests_allowed': 'guests_allowed',
+            'looking_for_room': 'is_looking_for_room',
+            'offering_room': 'is_looking_for_room'
+        }
+        field = pref_map.get(preference_filter)
+        if field:
+            value = True if preference_filter != 'offering_room' else False
+            profiles = profiles.filter(**{field: value})
 
-    # Apply filters to available rooms
+    # Filter Rooms
+    available_rooms = Room.objects.all()
     if search_query:
         available_rooms = available_rooms.filter(
             Q(title__icontains=search_query) |
@@ -88,8 +79,11 @@ def home(request):
         available_rooms = available_rooms.filter(city__iregex=r'(' + '|'.join(charleston_areas) + ')')
     if preference_filter in ['halal_kitchen', 'prayer_friendly', 'guests_allowed']:
         available_rooms = available_rooms.filter(**{preference_filter: True})
-    
-    # Create context dictionary to send to template
+
+    # Unique cities and neighborhoods for filter dropdowns
+    cities = Profile.objects.values_list('city', flat=True).distinct().order_by('city')
+    neighborhoods = Profile.objects.values_list('neighborhood', flat=True).distinct().order_by('neighborhood')
+
     context = {
         'profiles': profiles,
         'available_rooms': available_rooms,
@@ -97,221 +91,163 @@ def home(request):
         'neighborhoods': neighborhoods,
         'search_query': search_query,
         'city_filter': city_filter,
-        "neighborhood_filter": neighborhood_filter,
+        'neighborhood_filter': neighborhood_filter,
         'gender_filter': gender_filter,
         'preference_filter': preference_filter,
         'age_min': age_min,
         'age_max': age_max,
         'charleston_only': charleston_only,
-        "profile_count": profiles.count(),
-        "rooms_count": available_rooms.count(),
+        'profile_count': profiles.count(),
+        'rooms_count': available_rooms.count(),
     }
-    
+
     return render(request, 'home.html', context)
+
 
 def profile_detail(request, profile_id):
     """
-    Display detailed information about a specific profile.
-    
-    Args:
-        request: The HTTP request object
-        profile_id: The ID of the profile to display (from URL)
-    
-    Returns:
-        Rendered template with profile details
+    Display a single profile with similar profile suggestions.
     """
-    # get_object_or_404 tries to find the profile, if not found, shows 404 page
     profile = get_object_or_404(Profile, id=profile_id)
-    
-    # Get similar profiles with better location matching
-    similar_profiles = Profile.objects.exclude(id=profile.id)
+
+    # Similar profiles: same neighborhood -> same city -> Charleston metro
     similar_profiles_list = []
-    
+    similar_profiles = Profile.objects.exclude(id=profile.id)
+
     if profile.neighborhood:
-        similar_neighborhood = similar_profiles.filter(
+        neighborhood_matches = similar_profiles.filter(
             city=profile.city,
             neighborhood=profile.neighborhood
         )[:2]
-        similar_profiles_list.extend(similar_neighborhood)
+        similar_profiles_list.extend(neighborhood_matches)
 
-    # Then same city
     if len(similar_profiles_list) < 3:
-        similar_city = similar_profiles.filter(city=profile.city).exclude(
+        city_matches = similar_profiles.filter(city=profile.city).exclude(
             id__in=[p.id for p in similar_profiles_list]
         )[:3-len(similar_profiles_list)]
-        similar_profiles_list.extend(similar_city)
-    
-    # If still need more, and it's charleston area, expand to Charleston metro
+        similar_profiles_list.extend(city_matches)
+
     if len(similar_profiles_list) < 3 and profile.is_charleston_area():
         charleston_cities = ['charleston', 'mount pleasant', 'west ashley']
-        similar_metro = similar_profiles.filter(
+        metro_matches = similar_profiles.filter(
             city__iregex=r'(' + '|'.join(charleston_cities) + ')'
-        ).exclude(
-            id__in=[p.id for p in similar_profiles_list]
-        )[:3-len(similar_profiles_list)]
-        similar_profiles_list.extend(similar_metro)
-    
-    similar_profiles = similar_profiles_list
+        ).exclude(id__in=[p.id for p in similar_profiles_list])[:3-len(similar_profiles_list)]
+        similar_profiles_list.extend(metro_matches)
+
     context = {
         'profile': profile,
-        'similar_profiles': similar_profiles,
+        'similar_profiles': similar_profiles_list,
     }
-    
+
     return render(request, 'profile_detail.html', context)
 
+
 def room_detail(request, room_id):
+    """
+    Display a single room listing.
+    """
     room = get_object_or_404(Room, id=room_id)
-    context = {
-        'room': room,
-    }
-    return render(request, 'room_detail.html', context)
+    return render(request, 'room_detail.html', {'room': room})
+
 
 def contact_profile(request, profile_id):
     """
-    Handle contact requests to profile owners.
-    
-    This view allows users to send messages to profile owners while
-    maintaining privacy and tracking contact history.
-    
-    Args:
-        request: The HTTP request object
-        profile_id: The ID of the profile being contacted (from URL)
-    
-    Returns:
-        Either contact form or redirect to profile detail
+    Contact a profile owner via form submission.
     """
-    # Get the profile being contacted, or show 404 if not found
     profile = get_object_or_404(Profile, id=profile_id)
-    
+
     if request.method == 'POST':
-        # User submitted the contact form
         form = ContactForm(request.POST)
         if form.is_valid():
-            # Create the contact but don't save yet
             contact = form.save(commit=False)
-            # Associate the contact with the specific profile
             contact.profile = profile
-            # Save the contact to the database
             contact.save()
-            
-            # Show success message
-            messages.success(
-                request, 
-                f'Your message has been sent to {profile.name}! They will receive your contact information.'
-            )
-            
-            # Redirect back to the profile detail page
+            messages.success(request, f'Your message has been sent to {profile.name}!')
             return redirect('profile_detail', profile_id=profile.id)
         else:
-            # Form has errors, show them to the user
             messages.error(request, 'Please correct the errors below.')
     else:
-        # GET request - show empty contact form
         form = ContactForm()
-    
-    # Create context for the template
-    context = {
-        'form': form,
-        'profile': profile,
-    }
-    
-    return render(request, 'contact_profile.html', context)
 
-def delete_profile(request, profile_id):
+    return render(request, 'contact_profile.html', {'form': form, 'profile': profile})
+
+
+@login_required
+def create_profile(request):
     """
-    Delete a profile with confirmation.
-    
-    This view handles two scenarios:
-    1. GET request: Shows confirmation page
-    2. POST request: Actually deletes the profile
-    
-    Args:
-        request: The HTTP request object
-        profile_id: The ID of the profile to delete (from URL)
-    
-    Returns:
-        Either confirmation page or redirect to home
+    Create a new profile or update existing one to prevent duplicates.
     """
-    # Get the profile to delete, or show 404 if not found
-    profile = get_object_or_404(Profile, id=profile_id)
-    
+    try:
+        profile = Profile.objects.get(user=request.user)
+        is_new = False
+    except Profile.DoesNotExist:
+        profile = None
+        is_new = True
+
     if request.method == 'POST':
-        # User confirmed deletion - actually delete the profile
-        profile_name = profile.name  # Store name for success message
-        profile.delete()  # This removes the profile from the database
-        
-        # Show success message
-        messages.success(request, f'Profile "{profile_name}" has been deleted successfully.')
-        
-        # Redirect to home page
-        return redirect('home')
-    
-    # GET request - show confirmation page
-    context = {
-        'profile': profile,
-    }
-    
-    return render(request, 'delete_profile.html', context)
+        form = ProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            profile = form.save(commit=False)
+            profile.user = request.user
+            profile.save()
+            msg = 'Profile created successfully!' if is_new else 'Profile updated successfully!'
+            messages.success(request, msg)
+            return redirect('home')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ProfileForm(instance=profile)
 
+    return render(request, 'create_profile.html', {'form': form})
+
+
+@login_required
 def edit_profile(request, profile_id):
     """
     Edit an existing profile.
-    
-    Args:
-        request: The HTTP request object
-        profile_id: The ID of the profile to edit (from URL)
-    
-    Returns:
-        Rendered template with edit form
     """
-    # Get the profile to edit, or show 404 if not found
     profile = get_object_or_404(Profile, id=profile_id)
-    
+
     if request.method == 'POST':
-        # Create form with submitted data AND the existing profile instance
         form = ProfileForm(request.POST, instance=profile)
         if form.is_valid():
-            form.save()  # This updates the existing profile instead of creating new one
+            form.save()
             messages.success(request, 'Profile updated successfully!')
             return redirect('profile_detail', profile_id=profile.id)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
-        # Create form with existing profile data (pre-fills all fields)
         form = ProfileForm(instance=profile)
-    
-    context = {
-        'form': form,
-        'profile': profile,
-        'is_editing': True,  # Flag to show different title/button text
-    }
-    
-    return render(request, 'edit_profile.html', context)
+
+    return render(request, 'edit_profile.html', {'form': form, 'profile': profile, 'is_editing': True})
+
 
 @login_required
-def create_profile(request):
+def delete_profile(request, profile_id):
+    """
+    Delete a profile with confirmation.
+    """
+    profile = get_object_or_404(Profile, id=profile_id)
+
     if request.method == 'POST':
-        form = ProfileForm(request.POST)
-        if form.is_valid():
-            profile = form.save(commit=False)
-            profile.user = request.user
-            profile.save()
-            messages.success(request, 'Profile created successfully!')
-            return redirect('home')
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        form = ProfileForm()
-    
-    return render(request, 'create_profile.html', {'form': form})
+        profile_name = profile.name
+        profile.delete()
+        messages.success(request, f'Profile "{profile_name}" has been deleted successfully.')
+        return redirect('home')
+
+    return render(request, 'delete_profile.html', {'profile': profile})
+
 
 @login_required
 def create_room(request):
+    """
+    Create a room listing associated with the current user's profile.
+    """
     if request.method == 'POST':
         form = RoomForm(request.POST, request.FILES)
         if form.is_valid():
             room = form.save(commit=False)
-            room.user = request.user.profile #assigning profile instead of user
+            room.user = request.user.profile
             room.save()
             messages.success(request, 'Room listing created successfully!')
             return redirect('room_detail', room_id=room.id)
@@ -321,52 +257,63 @@ def create_room(request):
         form = RoomForm()
     return render(request, 'create_room.html', {'form': form})
 
+
 def register(request):
+    """
+    Register a new user and log them in immediately.
+    """
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, 'Account created successfully! Welcome to Muslim Roommate Finder!')
+            messages.success(request, 'Account created successfully! Welcome!')
             return redirect('home')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
         form = UserRegistrationForm()
-    
     return render(request, 'register.html', {'form': form})
 
+
 def user_login(request):
+    """
+    User login view using Django AuthenticationForm.
+    """
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                messages.success(request, f'Welcome back, {username}!')
-                return redirect('home')
+            user = form.get_user()
+            login(request, user)
+            messages.success(request, f'Welcome back, {user.username}!')
+            return redirect('home')
         else:
             messages.error(request, 'Invalid username or password.')
     else:
         form = AuthenticationForm()
-    
     return render(request, 'login.html', {'form': form})
 
+
+@login_required
 def user_logout(request):
+    """
+    Logout the current user.
+    """
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('home')
 
+
 @login_required
 def dashboard(request):
+    """
+    User dashboard showing their profile and recent room listings.
+    """
     try:
         profile = Profile.objects.get(user=request.user)
     except Profile.DoesNotExist:
         return redirect('create_profile')
 
-    # Get their rooms (thanks to related_name='rooms')
     user_rooms = profile.rooms.all()[:5]
 
     return render(request, 'dashboard.html', {
@@ -375,22 +322,24 @@ def dashboard(request):
     })
 
 
-
 @login_required
 def my_listings(request):
+    """
+    Show all room listings of the logged-in user.
+    """
     try:
         profile = Profile.objects.get(user=request.user)
     except Profile.DoesNotExist:
         return redirect('create_profile')
-    
+
     user_rooms = Room.objects.filter(user=profile)
-    
-    return render(request, 'my_listings.html', {
-        'rooms': user_rooms,
-    })
+    return render(request, 'my_listings.html', {'rooms': user_rooms})
+
 
 def advanced_search(request):
-    # Get all filter parameters
+    """
+    Advanced room search by rent, availability date, and room type.
+    """
     min_rent = request.GET.get('min_rent', '')
     max_rent = request.GET.get('max_rent', '')
     available_date = request.GET.get('available', '')
@@ -407,7 +356,6 @@ def advanced_search(request):
     if room_type:
         rooms = rooms.filter(room_type=room_type)
 
-    # Get unique values for dropdowns
     cities = Room.objects.values_list('city', flat=True).distinct().order_by('city')
     rent_ranges = [
         ('0-500', 'Under $500'),
@@ -423,14 +371,18 @@ def advanced_search(request):
         'filters': request.GET
     })
 
+
 @login_required
 def send_message(request, room_id=None):
+    """
+    Send a message to a user, optionally tied to a room.
+    """
     if request.method == 'POST':
         recipient_id = request.POST.get('recipient')
         subject = request.POST.get('subject')
         content = request.POST.get('content')
 
-        recipient = User.objects.get(id=recipient_id)
+        recipient = get_object_or_404(User, id=recipient_id)
         room = Room.objects.get(id=room_id) if room_id else None
 
         Message.objects.create(
@@ -443,12 +395,16 @@ def send_message(request, room_id=None):
 
         messages.success(request, 'Message sent successfully!')
         return redirect('inbox')
-    
+
     room = Room.objects.get(id=room_id) if room_id else None
     return render(request, 'send_message.html', {'room': room})
 
+
 @login_required
 def inbox(request):
+    """
+    Inbox showing received and sent messages.
+    """
     received_messages = Message.objects.filter(recipient=request.user)
     sent_messages = Message.objects.filter(sender=request.user)
 
@@ -456,5 +412,3 @@ def inbox(request):
         'received_messages': received_messages,
         'sent_messages': sent_messages
     })
-
-
