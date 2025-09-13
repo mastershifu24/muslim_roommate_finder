@@ -27,24 +27,42 @@
                     <form method="post">
                         {% csrf_token %}
 
+                        <!-- Owner -->
                         <div class="mb-3">
                             <label for="{{ form.user.id_for_label }}" class="form-label">Owner (optional)</label>
                             {{ form.user }}
                             {% if form.user.errors %}<div class="text-danger">{{ form.user.errors }}</div>{% endif %}
                         </div>
 
+                        <!-- Title -->
                         <div class="mb-3">
                             <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
                             {{ form.title }}
                             {% if form.title.errors %}<div class="text-danger">{{ form.title.errors }}</div>{% endif %}
                         </div>
 
+                        <!-- Description -->
                         <div class="mb-3">
                             <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
                             {{ form.description }}
                             {% if form.description.errors %}<div class="text-danger">{{ form.description.errors }}</div>{% endif %}
                         </div>
 
+                        <!-- Room Type / Amenities -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.room_type.id_for_label }}" class="form-label">Room Type</label>
+                                {{ form.room_type }}
+                                {% if form.room_type.errors %}<div class="text-danger">{{ form.room_type.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.amenities.id_for_label }}" class="form-label">Amenities</label>
+                                {{ form.amenities }}
+                                {% if form.amenities.errors %}<div class="text-danger">{{ form.amenities.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <!-- City / Neighborhood -->
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.city.id_for_label }}" class="form-label">City</label>
@@ -58,11 +76,12 @@
                             </div>
                         </div>
 
+                        <!-- Price / Available From -->
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="{{ form.rent.id_for_label }}" class="form-label">Monthly Rent</label>
-                                {{ form.rent }}
-                                {% if form.rent.errors %}<div class="text-danger">{{ form.rent.errors }}</div>{% endif %}
+                                <label for="{{ form.price.id_for_label }}" class="form-label">Monthly Rent</label>
+                                {{ form.price }}
+                                {% if form.price.errors %}<div class="text-danger">{{ form.price.errors }}</div>{% endif %}
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.available_from.id_for_label }}" class="form-label">Available From</label>
@@ -71,12 +90,14 @@
                             </div>
                         </div>
 
+                        <!-- Contact Email -->
                         <div class="mb-3">
                             <label for="{{ form.contact_email.id_for_label }}" class="form-label">Contact Email</label>
                             {{ form.contact_email }}
                             {% if form.contact_email.errors %}<div class="text-danger">{{ form.contact_email.errors }}</div>{% endif %}
                         </div>
 
+                        <!-- Preferences -->
                         <div class="mb-4">
                             <h5>Preferences</h5>
                             <div class="row">
@@ -113,5 +134,3 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-

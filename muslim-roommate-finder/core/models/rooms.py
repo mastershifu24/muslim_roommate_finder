@@ -25,12 +25,14 @@ class Room(models.Model):
     amenities = models.ManyToManyField(Amenity, blank=True)
     city = models.CharField(max_length=100)
     neighborhood = models.CharField(max_length=100, blank=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2)  # Monthly Rent
+    available_from = models.DateField(null=True, blank=True)       # Available From
     halal_kitchen = models.BooleanField(default=False)
     prayer_friendly = models.BooleanField(default=False)
     guests_allowed = models.BooleanField(default=True)
     slug = models.SlugField(unique=True, blank=True)
     contact_email = models.EmailField(blank=True)
+
 
     # methods (save, __str__) stay here
     def __str__(self):

@@ -135,19 +135,28 @@ class RoomForm(forms.ModelForm):
         model = Room
         fields = [
             'user', 'title', 'description',
+            'room_type', 'amenities',
             'city', 'neighborhood',
-            'price', 
+            'price', 'available_from',  # Added available_from
             'halal_kitchen', 'prayer_friendly', 'guests_allowed',
             'contact_email',
         ]
         widgets = {
             'user': forms.Select(attrs={'class': 'form-select'}),
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Room in Downtown Charleston'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
-            'city': forms.TextInput(attrs={'class': 'form-control'}),
-            'neighborhood': forms.TextInput(attrs={'class': 'form-control'}),
-            'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'contact_email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Describe your room'}),
+
+            'room_type': forms.Select(attrs={'class': 'form-select'}),
+            'amenities': forms.SelectMultiple(attrs={'class': 'form-select', 'multiple': True}),
+
+            'city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'City'}),
+            'neighborhood': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Neighborhood'}),
+            
+            'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'placeholder': 'Monthly Rent'}),
+            'available_from': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),  # date picker
+            
+            'contact_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email for contact'}),
+            
             'halal_kitchen': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'prayer_friendly': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'guests_allowed': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
