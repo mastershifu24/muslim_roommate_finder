@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', 'previous_migration'),
+        ('core', '0002_room_available_from.py'),
     ]
 
     operations = [
