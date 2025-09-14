@@ -30,7 +30,7 @@
     </div>
 
     {% if room.contact_email %}<p><strong>Contact:</strong> {{ room.contact_email }}</p>{% endif %}
-    {% if room.user %}<p class="text-muted">Posted by: <a href="{% url 'profile_detail' room.owner.id %}">{{ room.user.name }}</a></p>{% endif %}
+    {% if room.user %}<p class="text-muted">Posted by: {{ room.user.name }}</a></p>{% endif %}
   </div>
 </div>
 {% endblock %}
