@@ -22,7 +22,12 @@ class Profile(models.Model):
     slug = models.SlugField(unique=True, blank=True)
     
     def is_charleston_area(self):
-        return self.city and self.city.lower() == "charleston" and self.state and self.state.lower() == "sc"
+        if not self.city or not self.state:
+            return False
+        return (
+            self.city.strip().lower() == "charleston"
+            and self.state.strip().lower() in ["sc", "south carolina"]
+        )
 
     def __str__(self):
         return self.name  # <-- this will display the profile's name in dropdowns
