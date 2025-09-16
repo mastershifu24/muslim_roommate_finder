@@ -20,6 +20,9 @@ class Profile(models.Model):
     bio = models.TextField(blank=True)
     contact_email = models.EmailField(blank=True)
     slug = models.SlugField(unique=True, blank=True)
+    
+    def is_charleston_area(self):
+        return self.city and self.city.lower() == "charleston" and self.state and self.state.lower() == "sc"
 
     def __str__(self):
         return self.name  # <-- this will display the profile's name in dropdowns
