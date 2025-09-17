@@ -1,8 +1,9 @@
 from django.contrib import admin
-from core.models.reviews import Review
+from core.models import RoomReview
 
-@admin.register(Review)
-class ReviewAdmin(admin.ModelAdmin):
-    list_display = ("room", "user", "rating", "created_at")
-    search_fields = ("room__title", "user__username", "comment")
+@admin.register(RoomReview)
+class RoomReviewAdmin(admin.ModelAdmin):
+    list_display = ("room", "reviewer", "rating", "created_at")
+    search_fields = ("room__title", "reviewer__name", "comment")
     list_filter = ("rating", "created_at")
+    readonly_fields = ("created_at",)
