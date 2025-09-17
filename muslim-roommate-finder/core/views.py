@@ -63,7 +63,7 @@ def home(request):
             profiles = profiles.filter(**{field: value})
 
     # Filter Rooms
-    available_rooms = Room.objects.all()
+    available_rooms = Room.objects.filter(is_active=True)
     if search_query:
         available_rooms = available_rooms.filter(
             Q(title__icontains=search_query) |
@@ -352,12 +352,12 @@ def advanced_search(request):
     available_date = request.GET.get('available', '')
     room_type = request.GET.get('room_type', '')
 
-    rooms = Room.objects.all()
+    rooms = Room.objects.filter(is_active=True)
 
     if min_rent:
-        rooms = rooms.filter(rent__gte=min_rent)
+        rooms = rooms.filter(price__gte=min_rent)
     if max_rent:
-        rooms = rooms.filter(rent__lte=max_rent)
+        rooms = rooms.filter(price__lte=max_rent)
     if available_date:
         rooms = rooms.filter(available_from__lte=available_date)
     if room_type:

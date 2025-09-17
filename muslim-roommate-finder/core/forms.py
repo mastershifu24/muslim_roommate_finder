@@ -141,7 +141,7 @@ class RoomForm(forms.ModelForm):
     class Meta:
         model = Room
         fields = [
-            'user', 'title', 'description',
+            'title', 'description',
             'room_type', 'amenities',
             'city', 'neighborhood',
             'price', 'available_from',  # Added available_from
@@ -149,7 +149,6 @@ class RoomForm(forms.ModelForm):
             'contact_email',
         ]
         widgets = {
-            'user': forms.Select(attrs={'class': 'form-select'}),
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Room in Downtown Charleston'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Describe your room'}),
 

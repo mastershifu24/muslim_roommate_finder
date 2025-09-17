@@ -23,13 +23,13 @@
         <a href="{% url 'room_detail' room.id %}" class="text-decoration-none text-dark">
           <div class="card-header bg-success text-white">{{ room.title }}</div>
           <div class="card-body">
-            {% if room.image %}
-              <img src="{{ room.image.url }}" class="img-fluid mb-2 rounded" alt="Room image">
+            {% if room.primary_image %}
+              <img src="{{ room.primary_image.image.url }}" class="img-fluid mb-2 rounded" alt="Room image">
             {% else %}
               <img src="{% static 'images/no-image.jpg' %}" class="img-fluid mb-2 rounded" alt="No image available">
             {% endif %}
             <h6 class="text-muted">{{ room.city }}{% if room.neighborhood %} • {{ room.neighborhood }}{% endif %}</h6>
-            {% if room.rent %}<p><strong>Rent:</strong> ${{ room.rent }}</p>{% endif %}
+            <p><strong>Rent:</strong> {{ room.get_price_display }}</p>
             {% if room.description %}<p>{{ room.description }}</p>{% endif %}
             <small class="text-muted"><strong>Contact:</strong> {{ room.user.name }}</small>
           </div>
