@@ -7,6 +7,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from .models import Profile, Room, Message
 from .forms import ProfileForm, ContactForm, RoomForm, UserRegistrationForm
+from .models import RoomType, Amenity
 
 
 def home(request):
@@ -245,6 +246,9 @@ def create_room(request):
     """
     if request.method == 'POST':
         form = RoomForm(request.POST, request.FILES)
+        # Ensure querysets are populated server-side
+        form.fields['room_type'].queryset = RoomType.objects.order_by('name')
+        form.fields['amenities'].queryset = Amenity.objects.order_by('name')
         if form.is_valid():
             room = form.save(commit=False)
             room.user = request.user.profile
@@ -255,6 +259,9 @@ def create_room(request):
             messages.error(request, 'Please correct the errors below.')
     else:
         form = RoomForm()
+        # Ensure querysets are populated server-side
+        form.fields['room_type'].queryset = RoomType.objects.order_by('name')
+        form.fields['amenities'].queryset = Amenity.objects.order_by('name')
     return render(request, 'create_room.html', {'form': form})
 
 
