@@ -12,7 +12,7 @@ env/
 venv/
 ENV/
 .venv/
-**/venv/
+k...**/venv/
 **/.venv/
 ../.venv/
 
