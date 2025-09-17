@@ -1,5 +1,5 @@
 from django import forms
-from .models import Profile, Contact, Room, RoomImage
+from .models import Profile, Contact, Room, RoomImage, RoomType, Amenity
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -131,6 +131,13 @@ class ContactForm(forms.ModelForm):
 
 
 class RoomForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ensure dropdowns are populated and ordered
+        self.fields['room_type'].queryset = RoomType.objects.order_by('name')
+        self.fields['amenities'].queryset = Amenity.objects.order_by('name')
+        self.fields['room_type'].empty_label = 'Select a room type'
+
     class Meta:
         model = Room
         fields = [
