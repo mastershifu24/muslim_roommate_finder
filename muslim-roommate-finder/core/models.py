@@ -187,7 +187,7 @@ class Room(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="rooms", verbose_name="Owner")
     title = models.CharField(max_length=200, verbose_name="Room Title")
     description = models.TextField(blank=True, verbose_name="Description")
-    room_type = models.CharField(max_length=20, choices=ROOM_TYPE)
+    room_type = models.CharField(max_length=20, choices=ROOM_TYPES)
     amenities = models.ManyToManyField(Amenity, blank=True, verbose_name="Amenities")
     city = models.CharField(max_length=100, verbose_name="City", db_index=True)
     neighborhood = models.CharField(max_length=100, blank=True, verbose_name="Neighborhood")
