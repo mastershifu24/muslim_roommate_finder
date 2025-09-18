@@ -179,7 +179,7 @@ class Amenity(models.Model):
         return self.name
 
 class Room(models.Model):
-     ROOM_TYPES = [
+    ROOM_TYPES = [
         ("private", "Private Room"),
         ("shared", "Shared Room"),
         ("entire", "Entire Place"),
