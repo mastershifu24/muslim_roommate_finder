@@ -166,17 +166,23 @@ class RoomType(models.Model):
         return self.name
 
 class Amenity(models.Model):
-    name = models.CharField(max_length=100, verbose_name="Amenity Name")
+    name = models.CharField(max_length=100, verbose_name="Amenity Name", unique=True)
     icon = models.CharField(max_length=50, blank=True, verbose_name="Icon Class")
     description = models.TextField(blank=True, verbose_name="Description")
+    slug = models.SlugField(max_length=120, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = "Amenity"
         verbose_name_plural = "Amenities"
         ordering = ['name']
-
-    def __str__(self):
-        return self.name
 
 class Room(models.Model):
     ROOM_TYPES = [
@@ -188,7 +194,7 @@ class Room(models.Model):
     title = models.CharField(max_length=200, verbose_name="Room Title")
     description = models.TextField(blank=True, verbose_name="Description")
     room_type = models.CharField(max_length=20, choices=ROOM_TYPES)
-    amenities = models.ManyToManyField(Amenity, blank=True, verbose_name="Amenities")
+    amenities = models.ManyToManyField(Amenity, blank=True, verbose_name="Amenities", related_name='rooms')
     city = models.CharField(max_length=100, verbose_name="City", db_index=True)
     neighborhood = models.CharField(max_length=100, blank=True, verbose_name="Neighborhood")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monthly Rent")
