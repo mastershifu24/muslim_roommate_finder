@@ -233,8 +233,8 @@ def create_room(request):
         messages.success(request, 'Room listing created successfully!')
     return redirect('room_detail', room_id=room.id)
 
-        else:
-            messages.error(request, 'Please correct the errors below.')
+    else:
+        messages.error(request, 'Please correct the errors below.')
     else:
         form = RoomForm()
         form.fields['room_type'].queryset = RoomType.objects.order_by('name')
