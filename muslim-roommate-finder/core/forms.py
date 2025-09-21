@@ -139,10 +139,10 @@ class RoomForm(forms.ModelForm):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
 
-         # Ensure dropdowns are populated and ordered
-        self.fields['room_type'].queryset = RoomType.objects.order_by('name')
-        self.fields['amenities'].queryset = Amenity.objects.order_by('name')
-        self.fields['room_type'].empty_label = 'Select a room type'
+            # Ensure dropdowns are populated and ordered
+            self.fields['room_type'].queryset = RoomType.objects.order_by('name')
+            self.fields['amenities'].queryset = Amenity.objects.order_by('name')
+            self.fields['room_type'].empty_label = 'Select a room type'
 
          # If editing an existing Room, show its amenities
         if self.instance.pk:
