@@ -229,12 +229,11 @@ def create_room(request):
         room = form.save(commit=False)
         room.user = request.user.profile
         room.save()
-        form.save_m2m()  # saves amenities etc.
-        messages.success(request, 'Room listing created successfully!')
-    return redirect('room_detail', room_id=room.id)
-
+        messages.success(request, "Room listing created successfully!")
+        return redirect("room_detail", room_id=room.id)
     else:
-        messages.error(request, 'Please correct the errors below.')
+        messages.error(request, "Please correct the errors below.")
+
     else:
         form = RoomForm()
         form.fields['room_type'].queryset = RoomType.objects.order_by('name')
