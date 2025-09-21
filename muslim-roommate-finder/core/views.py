@@ -228,23 +228,16 @@ def create_room(request):
         if form.is_valid():
             room = form.save(commit=False)
             room.user = request.user.profile
+            room.save()  # Save first for M2M
 
-            # Convert room_type string from POST to RoomType instance
-            room_type_name = request.POST.get('room_type')
-            if room_type_name:
-                try:
-                    room.room_type = RoomType.objects.get(name=room_type_name)
-                except RoomType.DoesNotExist:
-                    room.room_type = None
-
-            room.save()
-
-            # Set amenities: user-selected or default
+            # Set amenities: user-selected or default from room_type
             amenity_ids = request.POST.getlist('amenities')
             if amenity_ids:
                 room.amenities.set(amenity_ids)
             elif room.room_type:
                 room.amenities.set(room.room_type.default_amenities.all())
+            else:
+                room.amenities.clear()  # fallback if no room_type
 
             messages.success(request, 'Room listing created successfully!')
             return redirect('room_detail', room_id=room.id)
@@ -256,6 +249,8 @@ def create_room(request):
         form.fields['amenities'].queryset = Amenity.objects.order_by('name')
 
     return render(request, 'create_room.html', {'form': form})
+
+
 
 
 def register(request):
