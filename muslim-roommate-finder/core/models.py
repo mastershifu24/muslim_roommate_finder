@@ -156,6 +156,7 @@ class Message(models.Model):
 class RoomType(models.Model):
     name = models.CharField(max_length=100, verbose_name="Room Type")
     description = models.TextField(blank=True, verbose_name="Description")
+    default_amenities = models.ManyToManyField('Amenity', blank=True)
 
     class Meta:
         verbose_name = "Room Type"
@@ -251,7 +252,17 @@ class Room(models.Model):
                 slug = f"{base_slug}-{counter}"
                 counter += 1
             self.slug = slug
+
+        # 2️⃣ Check if room is new
+        is_new = self.pk is None
+
+        # 3️⃣ Save the room
         super().save(*args, **kwargs)
+
+        # 4️⃣ Add default amenities from room_type if new
+        if is_new and self.room_type:
+            self.amenities.set(self.room_type.default_amenities.all())
+
 
 def validate_image_size(image):
     """Validate image file size (max 5MB)"""
