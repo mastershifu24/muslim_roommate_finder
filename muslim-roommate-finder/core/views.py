@@ -49,7 +49,6 @@ def home(request):
     if age_max:
         profiles = profiles.filter(age__lte=age_max)
     if preference_filter:
-        # Map preference filters to Profile fields
         pref_map = {
             'halal_kitchen': 'halal_kitchen',
             'prayer_friendly': 'prayer_friendly',
@@ -81,7 +80,6 @@ def home(request):
     if preference_filter in ['halal_kitchen', 'prayer_friendly', 'guests_allowed']:
         available_rooms = available_rooms.filter(**{preference_filter: True})
 
-    # Unique cities and neighborhoods for filter dropdowns
     cities = Profile.objects.values_list('city', flat=True).distinct().order_by('city')
     neighborhoods = Profile.objects.values_list('neighborhood', flat=True).distinct().order_by('neighborhood')
 
@@ -106,12 +104,8 @@ def home(request):
 
 
 def profile_detail(request, profile_id):
-    """
-    Display a single profile with similar profile suggestions.
-    """
     profile = get_object_or_404(Profile, id=profile_id)
 
-    # Similar profiles: same neighborhood -> same city -> Charleston metro
     similar_profiles_list = []
     similar_profiles = Profile.objects.exclude(id=profile.id)
 
@@ -125,14 +119,14 @@ def profile_detail(request, profile_id):
     if len(similar_profiles_list) < 3:
         city_matches = similar_profiles.filter(city=profile.city).exclude(
             id__in=[p.id for p in similar_profiles_list]
-        )[:3-len(similar_profiles_list)]
+        )[:3 - len(similar_profiles_list)]
         similar_profiles_list.extend(city_matches)
 
     if len(similar_profiles_list) < 3 and profile.is_charleston_area():
         charleston_cities = ['charleston', 'mount pleasant', 'west ashley']
         metro_matches = similar_profiles.filter(
             city__iregex=r'(' + '|'.join(charleston_cities) + ')'
-        ).exclude(id__in=[p.id for p in similar_profiles_list])[:3-len(similar_profiles_list)]
+        ).exclude(id__in=[p.id for p in similar_profiles_list])[:3 - len(similar_profiles_list)]
         similar_profiles_list.extend(metro_matches)
 
     context = {
@@ -144,17 +138,11 @@ def profile_detail(request, profile_id):
 
 
 def room_detail(request, room_id):
-    """
-    Display a single room listing.
-    """
     room = get_object_or_404(Room, id=room_id)
     return render(request, 'room_detail.html', {'room': room})
 
 
 def contact_profile(request, profile_id):
-    """
-    Contact a profile owner via form submission.
-    """
     profile = get_object_or_404(Profile, id=profile_id)
 
     if request.method == 'POST':
@@ -175,9 +163,6 @@ def contact_profile(request, profile_id):
 
 @login_required
 def create_profile(request):
-    """
-    Create a new profile or update existing one to prevent duplicates.
-    """
     try:
         profile = Profile.objects.get(user=request.user)
         is_new = False
@@ -204,9 +189,6 @@ def create_profile(request):
 
 @login_required
 def edit_profile(request, profile_id):
-    """
-    Edit an existing profile.
-    """
     profile = get_object_or_404(Profile, id=profile_id)
 
     if request.method == 'POST':
@@ -225,9 +207,6 @@ def edit_profile(request, profile_id):
 
 @login_required
 def delete_profile(request, profile_id):
-    """
-    Delete a profile with confirmation.
-    """
     profile = get_object_or_404(Profile, id=profile_id)
 
     if request.method == 'POST':
@@ -241,34 +220,45 @@ def delete_profile(request, profile_id):
 
 @login_required
 def create_room(request):
-    """
-    Create a room listing associated with the current user's profile.
-    """
     if request.method == 'POST':
         form = RoomForm(request.POST, request.FILES)
-        # Ensure querysets are populated server-side
         form.fields['room_type'].queryset = RoomType.objects.order_by('name')
         form.fields['amenities'].queryset = Amenity.objects.order_by('name')
+
         if form.is_valid():
             room = form.save(commit=False)
             room.user = request.user.profile
+
+            # Convert room_type string from POST to RoomType instance
+            room_type_name = request.POST.get('room_type')
+            if room_type_name:
+                try:
+                    room.room_type = RoomType.objects.get(name=room_type_name)
+                except RoomType.DoesNotExist:
+                    room.room_type = None
+
             room.save()
+
+            # Set amenities: user-selected or default
+            amenity_ids = request.POST.getlist('amenities')
+            if amenity_ids:
+                room.amenities.set(amenity_ids)
+            elif room.room_type:
+                room.amenities.set(room.room_type.default_amenities.all())
+
             messages.success(request, 'Room listing created successfully!')
             return redirect('room_detail', room_id=room.id)
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
         form = RoomForm()
-        # Ensure querysets are populated server-side
         form.fields['room_type'].queryset = RoomType.objects.order_by('name')
         form.fields['amenities'].queryset = Amenity.objects.order_by('name')
+
     return render(request, 'create_room.html', {'form': form})
 
 
 def register(request):
-    """
-    Register a new user and log them in immediately.
-    """
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
@@ -284,9 +274,6 @@ def register(request):
 
 
 def user_login(request):
-    """
-    User login view using Django AuthenticationForm.
-    """
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -303,9 +290,6 @@ def user_login(request):
 
 @login_required
 def user_logout(request):
-    """
-    Logout the current user.
-    """
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('home')
@@ -313,27 +297,17 @@ def user_logout(request):
 
 @login_required
 def dashboard(request):
-    """
-    User dashboard showing their profile and recent room listings.
-    """
     try:
         profile = Profile.objects.get(user=request.user)
     except Profile.DoesNotExist:
         return redirect('create_profile')
 
     user_rooms = profile.rooms.all()[:5]
-
-    return render(request, 'dashboard.html', {
-        'rooms': user_rooms,
-        'profiles': [profile],
-    })
+    return render(request, 'dashboard.html', {'rooms': user_rooms, 'profiles': [profile]})
 
 
 @login_required
 def my_listings(request):
-    """
-    Show all room listings of the logged-in user.
-    """
     try:
         profile = Profile.objects.get(user=request.user)
     except Profile.DoesNotExist:
@@ -344,9 +318,6 @@ def my_listings(request):
 
 
 def advanced_search(request):
-    """
-    Advanced room search by rent, availability date, and room type.
-    """
     min_rent = request.GET.get('min_rent', '')
     max_rent = request.GET.get('max_rent', '')
     available_date = request.GET.get('available', '')
@@ -381,9 +352,6 @@ def advanced_search(request):
 
 @login_required
 def send_message(request, room_id=None):
-    """
-    Send a message to a user, optionally tied to a room.
-    """
     if request.method == 'POST':
         recipient_id = request.POST.get('recipient')
         subject = request.POST.get('subject')
@@ -409,13 +377,7 @@ def send_message(request, room_id=None):
 
 @login_required
 def inbox(request):
-    """
-    Inbox showing received and sent messages.
-    """
     received_messages = Message.objects.filter(recipient=request.user)
     sent_messages = Message.objects.filter(sender=request.user)
 
-    return render(request, 'inbox.html', {
-        'received_messages': received_messages,
-        'sent_messages': sent_messages
-    })
+    return render(request, 'inbox.html', {'received_messages': received_messages, 'sent_messages': sent_messages})
