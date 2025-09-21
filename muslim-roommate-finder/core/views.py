@@ -225,21 +225,36 @@ def create_room(request):
         form.fields['room_type'].queryset = RoomType.objects.order_by('name')
         form.fields['amenities'].queryset = Amenity.objects.order_by('name')
 
-    if form.is_valid():
-        room = form.save(commit=False)
-        room.user = request.user.profile
-        room.save()
-        messages.success(request, "Room listing created successfully!")
-        return redirect("room_detail", room_id=room.id)
-    else:
-        messages.error(request, "Please correct the errors below.")
+        if form.is_valid():
+            room = form.save(commit=False)
+            room.user = request.user.profile
 
+            room_type_name = request.POST.get('room_type')
+            if room_type_name:
+                try:
+                    room.room_type = RoomType.objects.get(name=room_type_name)
+                except RoomType.DoesNotExist:
+                    room.room_type = None
+
+            room.save()
+
+            amenity_ids = request.POST.getlist('amenities')
+            if amenity_ids:
+                room.amenities.set(amenity_ids)
+            elif room.room_type:
+                room.amenities.set(room.room_type.default_amenities.all())
+
+            messages.success(request, "Room listing created successfully!")
+            return redirect("room_detail", room_id=room.id)
+
+        # ❌ don’t use dangling `else:` after a return
+        messages.error(request, "Please correct the errors below.")
     else:
         form = RoomForm()
         form.fields['room_type'].queryset = RoomType.objects.order_by('name')
         form.fields['amenities'].queryset = Amenity.objects.order_by('name')
 
-    return render(request, 'create_room.html', {'form': form})
+    return render(request, "create_room.html", {"form": form})
 
 
 
