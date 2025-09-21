@@ -134,9 +134,11 @@ class RoomForm(forms.ModelForm):
     class Meta:
         model = Room
         fields = [
-            'title', 'description', 'price', 'city', 'neighborhood',
-            'room_type', 'amenities', 'is_active', 'available_from'
-        ]
+    'title', 'description', 'price', 'city', 'neighborhood',
+    'room_type', 'amenities', 'is_active', 'available_from',
+    'contact_email', 'halal_kitchen', 'prayer_friendly', 'guests_allowed'
+]
+
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Room in Downtown Charleston'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Describe your room'}),
