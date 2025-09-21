@@ -137,7 +137,7 @@ class RoomForm(forms.ModelForm):
         fields = ['title', 'description', 'price', 'city', 'neighborhood', 'room_type', 'amenities', 'is_active', 'available_from']
 
         def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+            super().__init__(*args, **kwargs)
 
          # Ensure dropdowns are populated and ordered
         self.fields['room_type'].queryset = RoomType.objects.order_by('name')
