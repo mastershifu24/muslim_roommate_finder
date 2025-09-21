@@ -230,6 +230,9 @@ def create_room(request):
             room.user = request.user.profile
             room.save()  # Save first for M2M
 
+            #Save user-selected amenities
+            form.save_m2m()
+
             # Set amenities: user-selected or default from room_type
             amenity_ids = request.POST.getlist('amenities')
             if amenity_ids:

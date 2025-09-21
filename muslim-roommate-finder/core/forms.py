@@ -131,23 +131,32 @@ class ContactForm(forms.ModelForm):
 
 
 class RoomForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
+
+    class Meta:
+        model = Room
+        fields = ['title', 'description', 'price', 'city', 'neighborhood', 'room_type', 'amenities', 'is_active', 'available_from']
+
+        def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Ensure dropdowns are populated and ordered
+
+         # Ensure dropdowns are populated and ordered
         self.fields['room_type'].queryset = RoomType.objects.order_by('name')
         self.fields['amenities'].queryset = Amenity.objects.order_by('name')
         self.fields['room_type'].empty_label = 'Select a room type'
 
-    class Meta:
-        model = Room
-        fields = [
-            'title', 'description',
-            'room_type', 'amenities',
-            'city', 'neighborhood',
-            'price', 'available_from',  # Added available_from
-            'halal_kitchen', 'prayer_friendly', 'guests_allowed',
-            'contact_email',
-        ]
+         # If editing an existing Room, show its amenities
+        if self.instance.pk:
+            self.fields['amenities'].initial = self.instance.amenities.all()
+        else:
+            # If creating new room and room_type is selected via POST, prefill amenities
+            room_type_id = self.data.get('room_type') or getattr(self.instance, 'room_type_id', None)
+            if room_type_id:
+                try:
+                    room_type = RoomType.objects.get(id=room_type_id)
+                    self.fields['amenities'].initial = room_type.default_amenities.all()
+                except RoomType.DoesNotExist:
+                    pass
+
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Room in Downtown Charleston'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Describe your room'}),
