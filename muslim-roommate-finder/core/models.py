@@ -169,6 +169,7 @@ class Amenity(models.Model):
     name = models.CharField(max_length=100, verbose_name="Amenity Name")
     icon = models.CharField(max_length=50, blank=True, verbose_name="Icon Class")
     description = models.TextField(blank=True, verbose_name="Description")
+    slug = models.SlugField(unique=True, null=False)
 
     class Meta:
         verbose_name = "Amenity"

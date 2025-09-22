@@ -14,8 +14,10 @@ def seed_data(sender, **kwargs):
 
     # Seed Amenity
     for name in amenities:
-        Amenity.objects.get_or_create(name=name)
-
+        Amenity.objects.get_or_create(
+            name=name,
+            defaults={'slug': slugify(name)}
+    )
 
 class CoreConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
