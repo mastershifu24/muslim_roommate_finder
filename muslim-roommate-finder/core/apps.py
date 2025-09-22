@@ -8,19 +8,17 @@ def seed_data(sender, **kwargs):
     roomtypes = ["Entire place", "Private room", "Shared room"]
     amenities = ["Wifi", "Parking", "Furnished", "Laundry", "Utilities included"]
 
-    # Seed RoomTypes
+    # Seed RoomType
     for name in roomtypes:
-        RoomType.objects.get_or_create(
-            name=name,
-            defaults={'slug': slugify(name)}
-        )
+        RoomType.objects.get_or_create(name=name)
 
-    # Seed Amenities
+    # Seed Amenity
     for name in amenities:
         Amenity.objects.get_or_create(
             name=name,
             defaults={'slug': slugify(name)}
         )
+
 
 class CoreConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
