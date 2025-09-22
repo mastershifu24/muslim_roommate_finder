@@ -156,7 +156,6 @@ class Message(models.Model):
 class RoomType(models.Model):
     name = models.CharField(max_length=100, verbose_name="Room Type")
     description = models.TextField(blank=True, verbose_name="Description")
-    default_amenities = models.ManyToManyField('Amenity', blank=True)
 
     class Meta:
         verbose_name = "Room Type"
@@ -167,35 +166,24 @@ class RoomType(models.Model):
         return self.name
 
 class Amenity(models.Model):
-    name = models.CharField(max_length=100, verbose_name="Amenity Name", unique=True)
+    name = models.CharField(max_length=100, verbose_name="Amenity Name")
     icon = models.CharField(max_length=50, blank=True, verbose_name="Icon Class")
     description = models.TextField(blank=True, verbose_name="Description")
-    slug = models.SlugField(max_length=120, blank=True)
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
 
     class Meta:
         verbose_name = "Amenity"
         verbose_name_plural = "Amenities"
         ordering = ['name']
 
+    def __str__(self):
+        return self.name
+
 class Room(models.Model):
-    ROOM_TYPES = [
-        ("private", "Private Room"),
-        ("shared", "Shared Room"),
-        ("entire", "Entire Place"),
-    ]
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="rooms", verbose_name="Owner")
     title = models.CharField(max_length=200, verbose_name="Room Title")
     description = models.TextField(blank=True, verbose_name="Description")
-    room_type = models.CharField(max_length=20, choices=ROOM_TYPES)
-    amenities = models.ManyToManyField(Amenity, blank=True, verbose_name="Amenities", related_name='rooms')
+    room_type = models.ForeignKey(RoomType, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Room Type")
+    amenities = models.ManyToManyField(Amenity, blank=True, verbose_name="Amenities")
     city = models.CharField(max_length=100, verbose_name="City", db_index=True)
     neighborhood = models.CharField(max_length=100, blank=True, verbose_name="Neighborhood")
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Monthly Rent")
@@ -252,17 +240,7 @@ class Room(models.Model):
                 slug = f"{base_slug}-{counter}"
                 counter += 1
             self.slug = slug
-
-        # 2️⃣ Check if room is new
-        is_new = self.pk is None
-
-        # 3️⃣ Save the room
         super().save(*args, **kwargs)
-
-        # 4️⃣ Add default amenities from room_type if new
-        if is_new and self.room_type:
-            self.amenities.set(self.room_type.default_amenities.all())
-
 
 def validate_image_size(image):
     """Validate image file size (max 5MB)"""

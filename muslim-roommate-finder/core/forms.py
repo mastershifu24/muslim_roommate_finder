@@ -131,47 +131,42 @@ class ContactForm(forms.ModelForm):
 
 
 class RoomForm(forms.ModelForm):
-    class Meta:
-        model = Room
-        fields = ['title', 'description', 'room_type', 'city', 'neighborhood', 
-                  'price', 'available_from', 'contact_email', 
-                  'halal_kitchen', 'prayer_friendly', 'guests_allowed', 'amenities']
-
-        widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Room in Downtown Charleston'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Describe your room'}),
-            'room_type': forms.Select(),  # dropdown with IDs
-            'amenities': forms.CheckboxSelectMultiple(),  # show checkboxes
-            'city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'City'}),
-            'neighborhood': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Neighborhood'}),
-            'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'placeholder': 'Monthly Rent'}),
-            'available_from': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'contact_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email for contact'}),
-            'halal_kitchen': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'prayer_friendly': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'guests_allowed': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        }
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # Order dropdowns
+        # Ensure dropdowns are populated and ordered
         self.fields['room_type'].queryset = RoomType.objects.order_by('name')
         self.fields['amenities'].queryset = Amenity.objects.order_by('name')
         self.fields['room_type'].empty_label = 'Select a room type'
 
-        # Handle initial amenity selection
-        if self.instance and self.instance.pk:
-            self.fields['amenities'].initial = self.instance.amenities.all()
-        else:
-            room_type_id = self.data.get('room_type') or getattr(self.instance, 'room_type_id', None)
-            if room_type_id:
-                try:
-                    room_type = RoomType.objects.get(id=room_type_id)
-                    self.fields['amenities'].initial = room_type.default_amenities.all()
-                except RoomType.DoesNotExist:
-                    pass
+    class Meta:
+        model = Room
+        fields = [
+            'title', 'description',
+            'room_type', 'amenities',
+            'city', 'neighborhood',
+            'price', 'available_from',  # Added available_from
+            'halal_kitchen', 'prayer_friendly', 'guests_allowed',
+            'contact_email',
+        ]
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Room in Downtown Charleston'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Describe your room'}),
 
+            'room_type': forms.Select(attrs={'class': 'form-select'}),
+            'amenities': forms.SelectMultiple(attrs={'class': 'form-select', 'multiple': True}),
+
+            'city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'City'}),
+            'neighborhood': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Neighborhood'}),
+            
+            'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'placeholder': 'Monthly Rent'}),
+            'available_from': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),  # date picker
+            
+            'contact_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email for contact'}),
+            
+            'halal_kitchen': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'prayer_friendly': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'guests_allowed': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
 
 class RoomImageForm(forms.ModelForm):
     class Meta:
