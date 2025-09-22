@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
+from django.core.management import call_command
 
 # Load .env if present
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -105,3 +106,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+if os.environ.get("RENDER"):
+    try:
+        call_command("loaddata", "initial_data.json")
+    except Exception as e:
+        print("Fixture load skipped:", e)

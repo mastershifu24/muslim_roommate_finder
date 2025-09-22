@@ -1,0 +1,43 @@
+[
+    {
+      "model": "core.roomtype",
+      "pk": 1,
+      "fields": {"name": "Entire place"}
+    },
+    {
+      "model": "core.roomtype",
+      "pk": 2,
+      "fields": {"name": "Private room"}
+    },
+    {
+      "model": "core.roomtype",
+      "pk": 3,
+      "fields": {"name": "Shared room"}
+    },
+    {
+      "model": "core.amenity",
+      "pk": 1,
+      "fields": {"name": "Wifi"}
+    },
+    {
+      "model": "core.amenity",
+      "pk": 2,
+      "fields": {"name": "Parking"}
+    },
+    {
+      "model": "core.amenity",
+      "pk": 3,
+      "fields": {"name": "Furnished"}
+    },
+    {
+      "model": "core.amenity",
+      "pk": 4,
+      "fields": {"name": "Laundry"}
+    },
+    {
+      "model": "core.amenity",
+      "pk": 5,
+      "fields": {"name": "Utilities included"}
+    }
+  ]
+  
