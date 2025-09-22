@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
+from django.utils.text import slugify
 
 def seed_data(sender, **kwargs):
     from core.models import RoomType, Amenity
@@ -7,11 +8,19 @@ def seed_data(sender, **kwargs):
     roomtypes = ["Entire place", "Private room", "Shared room"]
     amenities = ["Wifi", "Parking", "Furnished", "Laundry", "Utilities included"]
 
+    # Seed RoomTypes
     for name in roomtypes:
-        RoomType.objects.get_or_create(name=name)
+        RoomType.objects.get_or_create(
+            name=name,
+            defaults={'slug': slugify(name)}
+        )
 
+    # Seed Amenities
     for name in amenities:
-        Amenity.objects.get_or_create(name=name)
+        Amenity.objects.get_or_create(
+            name=name,
+            defaults={'slug': slugify(name)}
+        )
 
 class CoreConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
