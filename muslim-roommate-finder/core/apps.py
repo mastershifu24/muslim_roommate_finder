@@ -14,10 +14,7 @@ def seed_data(sender, **kwargs):
 
     # Seed Amenity
     for name in amenities:
-        Amenity.objects.get_or_create(
-            name=name,
-            defaults={'slug': slugify(name)}
-        )
+        Amenity.objects.get_or_create(name=name)
 
 
 class CoreConfig(AppConfig):
