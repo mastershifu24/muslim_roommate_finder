@@ -133,7 +133,7 @@ class ContactForm(forms.ModelForm):
 class RoomForm(forms.ModelForm):
     class Meta:
         model = Room
-         fields = ['title', 'description', 'room_type', 'city', 'neighborhood', 
+        fields = ['title', 'description', 'room_type', 'city', 'neighborhood', 
                   'price', 'available_from', 'contact_email', 
                   'halal_kitchen', 'prayer_friendly', 'guests_allowed', 'amenities']
 
