@@ -133,17 +133,15 @@ class ContactForm(forms.ModelForm):
 class RoomForm(forms.ModelForm):
     class Meta:
         model = Room
-        fields = [
-    'title', 'description', 'price', 'city', 'neighborhood',
-    'room_type', 'amenities', 'is_active', 'available_from',
-    'contact_email', 'halal_kitchen', 'prayer_friendly', 'guests_allowed'
-]
+         fields = ['title', 'description', 'room_type', 'city', 'neighborhood', 
+                  'price', 'available_from', 'contact_email', 
+                  'halal_kitchen', 'prayer_friendly', 'guests_allowed', 'amenities']
 
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Room in Downtown Charleston'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Describe your room'}),
-            'room_type': forms.Select(attrs={'class': 'form-select'}),
-            'amenities': forms.SelectMultiple(attrs={'class': 'form-select', 'multiple': True}),
+            'room_type': forms.Select(),  # dropdown with IDs
+            'amenities': forms.CheckboxSelectMultiple(),  # show checkboxes
             'city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'City'}),
             'neighborhood': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Neighborhood'}),
             'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'placeholder': 'Monthly Rent'}),
