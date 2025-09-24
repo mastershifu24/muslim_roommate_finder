@@ -351,6 +351,7 @@ def advanced_search(request):
     max_rent = request.GET.get('max_rent', '')
     available_date = request.GET.get('available', '')
     room_type = request.GET.get('room_type', '')
+    amenities = request.GET.getlist('amenities')
 
     rooms = Room.objects.filter(is_active=True)
 
@@ -362,6 +363,8 @@ def advanced_search(request):
         rooms = rooms.filter(available_from__lte=available_date)
     if room_type:
         rooms = rooms.filter(room_type=room_type)
+    if amenities:
+        rooms = rooms.filter(amenities__id__in=amenities).distinct()
 
     cities = Room.objects.values_list('city', flat=True).distinct().order_by('city')
     rent_ranges = [
@@ -370,12 +373,15 @@ def advanced_search(request):
         ('1000-1500', '$1,000 - $1,500'),
         ('1500+', 'Over $1,500'),
     ]
+    all_amenities = Amenity.objects.all().order_by('name')
 
     return render(request, 'advanced_search.html', {
         'rooms': rooms,
         'cities': cities,
         'rent_ranges': rent_ranges,
-        'filters': request.GET
+        'filters': request.GET,
+        'amenities': all_amenities,
+        'room_type_list': room_type_list,
     })
 
 
