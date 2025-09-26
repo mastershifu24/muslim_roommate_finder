@@ -143,13 +143,14 @@ def profile_detail(request, profile_id):
     return render(request, 'profile_detail.html', context)
 
 
+
 @login_required
 def room_detail(request, pk):
     """
     Display a single room listing.
     """
     room = get_object_or_404(Room, pk=pk)
-    return render(request, "room_detail.html", {"room": room})
+    return render(request, "room_detail.html", {"room": room})  # ✅ fixed
 
 
 def contact_profile(request, profile_id):
@@ -247,7 +248,6 @@ def create_room(request):
     """
     if request.method == 'POST':
         form = RoomForm(request.POST, request.FILES)
-        # Ensure querysets are populated server-side
         form.fields['room_type'].queryset = RoomType.objects.order_by('name')
         form.fields['amenities'].queryset = Amenity.objects.order_by('name')
         if form.is_valid():
@@ -255,12 +255,11 @@ def create_room(request):
             room.user = request.user.profile
             room.save()
             messages.success(request, 'Room listing created successfully!')
-            return redirect('room_detail', room_id=room.id)
+            return redirect('room_detail', pk=room.id)  # ✅ fixed
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
         form = RoomForm()
-        # Ensure querysets are populated server-side
         form.fields['room_type'].queryset = RoomType.objects.order_by('name')
         form.fields['amenities'].queryset = Amenity.objects.order_by('name')
     return render(request, 'create_room.html', {'form': form})
@@ -386,23 +385,18 @@ def advanced_search(request):
     })
 
 @login_required
-def room_detail(request, rk):
-    room = get_object_or_404(Room, pk=pk)
-    return render(request, "rooms/room_detail", {"room": room})
-
-@login_required
 def room_edit(request, pk):
     """
     Allow the owner of the room to edit the listing.
     """
-    room = get_object_or_404(Room, pk=pk, user=request.user.profile)  # user = profile
+    room = get_object_or_404(Room, pk=pk, user=request.user.profile)
 
     if request.method == "POST":
         form = RoomForm(request.POST, request.FILES, instance=room)
         if form.is_valid():
             form.save()
             messages.success(request, "Room updated successfully!")
-            return redirect("room_detail", pk=room.pk)
+            return redirect("room_detail", pk=room.id)  # ✅ fixed
         else:
             messages.error(request, "Please correct the errors below.")
     else:
