@@ -34,3 +34,8 @@
   </div>
 </div>
 {% endblock %}
+
+{% if request.user.is_authenticated and request.user.profile == room.user %}
+  <a href="{% url 'room_edit' room.pk %}" class="btn btn-warning">Edit Room</a>
+{% endif %}
+

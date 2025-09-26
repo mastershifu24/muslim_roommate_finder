@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Room - Muslim Roommate Finder{% endblock %}
+
+{% block content %}
+<a href="{% url 'room_detail' room.pk %}" class="btn btn-link">← Back to Room</a>
+
+<div class="card">
+  <div class="card-header bg-warning text-white">
+    <h2 class="mb-0">Edit Room: {{ room.title }}</h2>
+  </div>
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Save changes</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

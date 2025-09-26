@@ -143,12 +143,13 @@ def profile_detail(request, profile_id):
     return render(request, 'profile_detail.html', context)
 
 
-def room_detail(request, room_id):
+@login_required
+def room_detail(request, pk):
     """
     Display a single room listing.
     """
-    room = get_object_or_404(Room, id=room_id)
-    return render(request, 'room_detail.html', {'room': room})
+    room = get_object_or_404(Room, pk=pk)
+    return render(request, "room_detail.html", {"room": room})
 
 
 def contact_profile(request, profile_id):
@@ -384,6 +385,30 @@ def advanced_search(request):
         'room_type_list': room_type_list,
     })
 
+@login_required
+def room_detail(request, rk):
+    room = get_object_or_404(Room, pk=pk)
+    return render(request, "rooms/room_detail", {"room": room})
+
+@login_required
+def room_edit(request, pk):
+    """
+    Allow the owner of the room to edit the listing.
+    """
+    room = get_object_or_404(Room, pk=pk, user=request.user.profile)  # user = profile
+
+    if request.method == "POST":
+        form = RoomForm(request.POST, request.FILES, instance=room)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Room updated successfully!")
+            return redirect("room_detail", pk=room.pk)
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = RoomForm(instance=room)
+
+    return render(request, "room_edit.html", {"form": form, "room": room})
 
 @login_required
 def send_message(request, room_id=None):
