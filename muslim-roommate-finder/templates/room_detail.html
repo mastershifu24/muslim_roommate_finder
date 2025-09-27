@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% load static %}
 
 {% block title %}{{ room.title }} - Muslim Roommate Finder{% endblock %}
@@ -7,7 +6,15 @@
 {% block content %}
 <a href="{% url 'home' %}" class="btn btn-link">← Back to Home</a>
 
-<div class="card">
+{% if user.is_authenticated and room.user == user.profile %}
+    <a href="{% url 'room_edit' room.pk %}" class="btn btn-warning">✏️ Edit Room</a>
+    <a href="{% url 'room_delete' room.pk %}" class="btn btn-danger"
+       onclick="return confirm('Are you sure you want to delete this room?');">
+        🗑️ Delete Room
+    </a>
+{% endif %}
+
+<div class="card mt-3">
   <div class="card-header bg-success text-white">
     <h2 class="mb-0">{{ room.title }}</h2>
   </div>
@@ -30,12 +37,7 @@
     </div>
 
     {% if room.contact_email %}<p><strong>Contact:</strong> {{ room.contact_email }}</p>{% endif %}
-    {% if room.user %}<p class="text-muted">Posted by: {{ room.user.name }}</a></p>{% endif %}
+    {% if room.user %}<p class="text-muted">Posted by: {{ room.user.name }}</p>{% endif %}
   </div>
 </div>
 {% endblock %}
-
-{% if request.user.is_authenticated and request.user.profile == room.user %}
-  <a href="{% url 'room_edit' room.pk %}" class="btn btn-warning">Edit Room</a>
-{% endif %}
-

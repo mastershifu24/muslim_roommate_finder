@@ -5,9 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
-from .models import Profile, Room, Message
+from .models import Profile, Room, Message, RoomType, Amenity
 from .forms import ProfileForm, ContactForm, RoomForm, UserRegistrationForm
-from .models import RoomType, Amenity
 
 
 def home(request):
@@ -386,23 +385,24 @@ def advanced_search(request):
 
 @login_required
 def room_edit(request, pk):
-    """
-    Allow the owner of the room to edit the listing.
-    """
     room = get_object_or_404(Room, pk=pk, user=request.user.profile)
-
     if request.method == "POST":
         form = RoomForm(request.POST, request.FILES, instance=room)
         if form.is_valid():
             form.save()
-            messages.success(request, "Room updated successfully!")
-            return redirect("room_detail", pk=room.id)  # ✅ fixed
-        else:
-            messages.error(request, "Please correct the errors below.")
+            return redirect("room_detail", pk=room.pk)
     else:
         form = RoomForm(instance=room)
-
     return render(request, "room_edit.html", {"form": form, "room": room})
+
+@login_required
+def room_delete(request, pk):
+    room = get_object_or_404(Room, pk=pk, user=request.user.profile)
+    if request.method == "POST":
+        room.delete()
+        return redirect("dashboard")  # or "home" if you prefer
+    return render(request, "room_confirm_delete.html", {"room": room})
+
 
 @login_required
 def send_message(request, room_id=None):

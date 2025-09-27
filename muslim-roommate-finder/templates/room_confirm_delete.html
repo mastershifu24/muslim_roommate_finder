@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Room - Muslim Roommate Finder{% endblock %}
+
+{% block content %}
+<a href="{% url 'room_detail' room.pk %}" class="btn btn-link">← Cancel</a>
+
+<div class="card">
+  <div class="card-header bg-danger text-white">
+    <h2 class="mb-0">Delete Room</h2>
+  </div>
+  <div class="card-body">
+    <p>Are you sure you want to delete <strong>{{ room.title }}</strong>? This action cannot be undone.</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Yes, delete</button>
+      <a href="{% url 'room_detail' room.pk %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}
